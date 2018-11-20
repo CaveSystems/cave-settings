@@ -48,7 +48,7 @@
 using System;
 using System.Globalization;
 
-namespace Cave.IO
+namespace Cave
 {
     /// <summary>
     /// Provides an interface for reading settings

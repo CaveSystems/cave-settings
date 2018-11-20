@@ -47,7 +47,7 @@
 using System;
 using System.IO;
 
-namespace Cave.IO
+namespace Cave
 {
     /// <summary>
     /// Provides access to a file location
