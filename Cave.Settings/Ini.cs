@@ -56,12 +56,12 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 
-namespace Cave.IO
+namespace Cave
 {
     /// <summary>
     /// Provides access to an ini file
     /// </summary>
-    /// <seealso cref="Cave.IO.SettingsReader" />
+    /// <seealso cref="SettingsReader" />
     public class Ini : SettingsReader
     {
         static Ini m_UserIniFile;
@@ -240,8 +240,19 @@ namespace Cave.IO
                 foreach (var item in section.Items)
                 {
                     string name = item.Name.Trim();
-                    if (remove && (name.StartsWith("#") || name.StartsWith(";"))) continue;
-                    if (item.Value == null) result.Add(item.Name); else result.Add(item.Name + " = " + item.Value.Trim());
+                    if (remove && (name.StartsWith("#") || name.StartsWith(";")))
+                    {
+                        continue;
+                    }
+
+                    if (item.Value == null)
+                    {
+                        result.Add(item.Name);
+                    }
+                    else
+                    {
+                        result.Add(item.Name + " = " + item.Value.Trim());
+                    }
                 }
             }
             return result.ToArray();
@@ -309,8 +320,15 @@ namespace Cave.IO
         /// <returns></returns>
         public void WriteSection(string sectionName, IEnumerable values)
         {
-            if (sectionName == null) throw new ArgumentNullException("section");
-            if (values == null) throw new ArgumentNullException("values");
+            if (sectionName == null)
+            {
+                throw new ArgumentNullException("section");
+            }
+
+            if (values == null)
+            {
+                throw new ArgumentNullException("values");
+            }
 
             List<string> strings = new List<string>();
             foreach (object value in values)
@@ -328,10 +346,17 @@ namespace Cave.IO
         /// <returns></returns>
         public void WriteSection(string sectionName, IEnumerable<string> lines)
         {
-            if (sectionName == null) throw new ArgumentNullException("section");
-            if (lines == null) throw new ArgumentNullException("lines");
+            if (sectionName == null)
+            {
+                throw new ArgumentNullException("section");
+            }
 
-			Section newSection = new Section() { Name = sectionName };
+            if (lines == null)
+            {
+                throw new ArgumentNullException("lines");
+            }
+
+            Section newSection = new Section() { Name = sectionName };
 			foreach (string line in lines)
 			{
 				int i = line.IndexOf('=');
@@ -383,8 +408,12 @@ namespace Cave.IO
         /// <param name="obj">The object</param>
         public void WriteObject<T>(string sectionName, T obj) where T : class
         {
-            if (obj == null) throw new ArgumentNullException("obj");
-			List<string> newSection = new List<string>();
+            if (obj == null)
+            {
+                throw new ArgumentNullException("obj");
+            }
+
+            List<string> newSection = new List<string>();
 			foreach (FieldInfo field in obj.GetType().GetFields())
             {
                 string value = StringExtensions.ToString(field.GetValue(obj), Culture);
@@ -412,11 +441,22 @@ namespace Cave.IO
 		/// <param name="value">Value of the setting</param>
 		public void WriteSetting(string sectionName, string name, string value)
         {
-            if (sectionName == null) throw new ArgumentNullException("section");
-            if (name == null) throw new ArgumentNullException("name");
-            if (name.IndexOf('=') > -1) throw new ArgumentException(string.Format("Name may not contain an equal sign!"));
+            if (sectionName == null)
+            {
+                throw new ArgumentNullException("section");
+            }
 
-			var section = GetSection(sectionName);
+            if (name == null)
+            {
+                throw new ArgumentNullException("name");
+            }
+
+            if (name.IndexOf('=') > -1)
+            {
+                throw new ArgumentException(string.Format("Name may not contain an equal sign!"));
+            }
+
+            var section = GetSection(sectionName);
 			if (section == null)
 			{
 				section = new Section() { Name = sectionName };

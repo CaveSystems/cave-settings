@@ -52,10 +52,10 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 
-namespace Cave.IO
+namespace Cave
 {
     /// <summary>Provides a fast and simple initialization data reader class.</summary>
-    /// <seealso cref="Cave.IO.ISettings" />
+    /// <seealso cref="ISettings" />
     [DebuggerDisplay("{Name}")]
     public abstract class SettingsReader : ISettings
     {
@@ -150,7 +150,11 @@ namespace Cave.IO
                 try { result.Add((T)Enum.Parse(typeof(T), value.Trim(), true)); }
                 catch (Exception ex)
                 {
-                    if (throwEx) throw;
+                    if (throwEx)
+                    {
+                        throw;
+                    }
+
                     Trace.TraceWarning($"Ignoring Invalid Enum Value: {value}, Section: {section}, {ex}");
                 }
             }
@@ -208,13 +212,20 @@ namespace Cave.IO
         /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
         public bool ReadObject(string section, object container, bool throwEx = false)
         {
-            if (container == null) throw new ArgumentNullException("container");
+            if (container == null)
+            {
+                throw new ArgumentNullException("container");
+            }
             //iterate all fields of the struct
             Type type = container.GetType();
             FieldInfo[] fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
             if (fields.Length == 0)
             {
-                if (!throwEx) return false;
+                if (!throwEx)
+                {
+                    return false;
+                }
+
                 throw new ArgumentException("Container does not have any fields!");
             }
             bool result = true;
@@ -241,16 +252,30 @@ namespace Cave.IO
                 catch (Exception ex)
                 {
                     string message = $"Invalid field value {value} for field {field.FieldType.Name} {field.Name}";
-                    if (throwEx) throw new InvalidDataException(message, ex);
-                    else Trace.TraceWarning(message);
+                    if (throwEx)
+                    {
+                        throw new InvalidDataException(message, ex);
+                    }
+                    else
+                    {
+                        Trace.TraceWarning(message);
+                    }
+
                     result = false;
                 }
             }
             if (i == 0)
             {
                 string message = $"No field in section {section}!";
-                if (throwEx) throw new ArgumentException(message, nameof(container));
-                else Trace.TraceWarning(message);
+                if (throwEx)
+                {
+                    throw new ArgumentException(message, nameof(container));
+                }
+                else
+                {
+                    Trace.TraceWarning(message);
+                }
+
                 result = false;
             }
             return result;
@@ -268,11 +293,7 @@ namespace Cave.IO
             string result = null;
             if (!GetValue(section, name, ref result))
             {
-                if (defaultValue == null)
-                {
-                    throw new InvalidDataException(string.Format("Section [{0}] Setting {1} is unset!", section, name));
-                }
-                result = defaultValue;
+                result = defaultValue ?? throw new InvalidDataException(string.Format("Section [{0}] Setting {1} is unset!", section, name));
             }
             return result;
         }
@@ -503,8 +524,7 @@ namespace Cave.IO
             string v = ReadSetting(section, name);
             if (!string.IsNullOrEmpty(v))
             {
-                bool b;
-                if (bool.TryParse(v, out b))
+                if (bool.TryParse(v, out bool b))
                 {
                     value = b;
                     return true;
@@ -523,7 +543,11 @@ namespace Cave.IO
         public bool GetValue(string section, string name, ref string value)
         {
             string v = ReadSetting(section, name);
-            if (string.IsNullOrEmpty(v)) return false;
+            if (string.IsNullOrEmpty(v))
+            {
+                return false;
+            }
+
             value = v;
             return true;
         }
@@ -538,10 +562,12 @@ namespace Cave.IO
         public bool GetValue(string section, string name, ref int value)
         {
             string data = value.ToString(Culture);
-            if (!GetValue(section, name, ref data)) return false;
+            if (!GetValue(section, name, ref data))
+            {
+                return false;
+            }
 
-            int result;
-            if (int.TryParse(data, NumberStyles.Any, Culture, out result))
+            if (int.TryParse(data, NumberStyles.Any, Culture, out int result))
             {
                 value = result;
                 return true;
@@ -559,10 +585,12 @@ namespace Cave.IO
         public bool GetValue(string section, string name, ref uint value)
         {
             string data = value.ToString(Culture);
-            if (!GetValue(section, name, ref data)) return false;
+            if (!GetValue(section, name, ref data))
+            {
+                return false;
+            }
 
-            uint result;
-            if (uint.TryParse(data, NumberStyles.Any, Culture, out result))
+            if (uint.TryParse(data, NumberStyles.Any, Culture, out uint result))
             {
                 value = result;
                 return true;
@@ -580,10 +608,12 @@ namespace Cave.IO
         public bool GetValue(string section, string name, ref long value)
         {
             string data = value.ToString(Culture);
-            if (!GetValue(section, name, ref data)) return false;
+            if (!GetValue(section, name, ref data))
+            {
+                return false;
+            }
 
-            long result;
-            if (long.TryParse(data, NumberStyles.Any, Culture, out result))
+            if (long.TryParse(data, NumberStyles.Any, Culture, out long result))
             {
                 value = result;
                 return true;
@@ -601,10 +631,12 @@ namespace Cave.IO
         public bool GetValue(string section, string name, ref ulong value)
         {
             string data = value.ToString(Culture);
-            if (!GetValue(section, name, ref data)) return false;
+            if (!GetValue(section, name, ref data))
+            {
+                return false;
+            }
 
-            ulong result;
-            if (ulong.TryParse(data, NumberStyles.Any, Culture, out result))
+            if (ulong.TryParse(data, NumberStyles.Any, Culture, out ulong result))
             {
                 value = result;
                 return true;
@@ -621,10 +653,12 @@ namespace Cave.IO
         public bool GetValue(string section, string name, ref float value)
         {
             string data = value.ToString("R", Culture);
-            if (!GetValue(section, name, ref data)) return false;
+            if (!GetValue(section, name, ref data))
+            {
+                return false;
+            }
 
-            float result;
-            if (float.TryParse(data, NumberStyles.Any, Culture, out result))
+            if (float.TryParse(data, NumberStyles.Any, Culture, out float result))
             {
                 value = result;
                 return true;
@@ -642,10 +676,12 @@ namespace Cave.IO
         public bool GetValue(string section, string name, ref double value)
         {
             string data = value.ToString("R", Culture);
-            if (!GetValue(section, name, ref data)) return false;
+            if (!GetValue(section, name, ref data))
+            {
+                return false;
+            }
 
-            double result;
-            if (double.TryParse(data, NumberStyles.Any, Culture, out result))
+            if (double.TryParse(data, NumberStyles.Any, Culture, out double result))
             {
                 value = result;
                 return true;
@@ -663,10 +699,12 @@ namespace Cave.IO
         public bool GetValue(string section, string name, ref decimal value)
         {
             string data = value.ToString(Culture);
-            if (!GetValue(section, name, ref data)) return false;
+            if (!GetValue(section, name, ref data))
+            {
+                return false;
+            }
 
-            decimal result;
-            if (decimal.TryParse(data, NumberStyles.Any, Culture, out result))
+            if (decimal.TryParse(data, NumberStyles.Any, Culture, out decimal result))
             {
                 value = result;
                 return true;
@@ -684,10 +722,12 @@ namespace Cave.IO
         public bool GetValue(string section, string name, ref DateTime value)
         {
             string data = value.ToString(Culture);
-            if (!GetValue(section, name, ref data)) return false;
+            if (!GetValue(section, name, ref data))
+            {
+                return false;
+            }
 
-            DateTime result;
-            if (StringExtensions.TryParseDateTime(data, out result))
+            if (StringExtensions.TryParseDateTime(data, out DateTime result))
             {
                 value = result;
                 return true;
@@ -705,10 +745,12 @@ namespace Cave.IO
         public bool GetValue(string section, string name, ref TimeSpan value)
         {
             string data = value.ToString();
-            if (!GetValue(section, name, ref data)) return false;
+            if (!GetValue(section, name, ref data))
+            {
+                return false;
+            }
 
-            TimeSpan result;
-            if (TimeSpan.TryParse(data, out result))
+            if (TimeSpan.TryParse(data, out TimeSpan result))
             {
                 value = result;
                 return true;
@@ -727,10 +769,18 @@ namespace Cave.IO
         public bool GetEnum<T>(string section, string name, ref T value) where T : struct, IConvertible
         {
             string data = value.ToString();
-            if (!GetValue(section, name, ref data)) return false;
+            if (!GetValue(section, name, ref data))
+            {
+                return false;
+            }
+
             T resultValue = value;
             bool result = data.TryParse(out resultValue);
-            if (result) value = resultValue;
+            if (result)
+            {
+                value = resultValue;
+            }
+
             return result;
         }
         #endregion

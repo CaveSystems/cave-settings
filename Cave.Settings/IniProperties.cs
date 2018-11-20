@@ -51,7 +51,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Cave.IO
+namespace Cave
 {
     /// <summary>
     /// Provides properties for the <see cref="IniReader"/> and <see cref="IniWriter"/> classes.
@@ -102,8 +102,12 @@ namespace Cave.IO
 		public static IniProperties Encrypted(string password)
 		{
 			byte[] salt = new byte[16];
-			for (byte i = 0; i < salt.Length; salt[i] = ++i) ;
-			PasswordDeriveBytes PBKDF1 = new PasswordDeriveBytes(password, salt);
+			for (byte i = 0; i < salt.Length; salt[i] = ++i)
+            {
+                ;
+            }
+
+            PasswordDeriveBytes PBKDF1 = new PasswordDeriveBytes(password, salt);
 			IniProperties result = Default;
 			result.Encryption = new RijndaelManaged();
 			result.Encryption.BlockSize = 128;
@@ -170,7 +174,11 @@ namespace Cave.IO
         /// <returns><c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.</returns>
         public override bool Equals(object obj)
         {
-            if (obj is IniProperties) return base.Equals((IniProperties)obj);
+            if (obj is IniProperties)
+            {
+                return base.Equals((IniProperties)obj);
+            }
+
             return false;
         }
 

@@ -44,7 +44,7 @@
  */
 #endregion
 
-namespace Cave.IO
+namespace Cave
 {
     /// <summary>
     /// Available root locations

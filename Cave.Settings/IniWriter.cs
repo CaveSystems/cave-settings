@@ -54,9 +54,10 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using Cave.Compression;
+using Cave.IO;
 using Cave.Text;
 
-namespace Cave.IO
+namespace Cave
 {
 	/// <summary>
 	/// Provides a fast and simple ini writer class.
@@ -127,7 +128,11 @@ namespace Cave.IO
         /// <returns></returns>
         public static IniWriter FromLocation(FileLocation fileLocation, IniProperties properties = default(IniProperties))
         {
-            if (fileLocation == null) fileLocation = new FileLocation(root: RootLocation.RoamingUserConfig, extension: Ini.PlatformExtension);
+            if (fileLocation == null)
+            {
+                fileLocation = new FileLocation(root: RootLocation.RoamingUserConfig, extension: Ini.PlatformExtension);
+            }
+
             string fileName = fileLocation.ToString();
             return FromFile(fileName, properties);
         }
@@ -179,8 +184,14 @@ namespace Cave.IO
         {
             Properties = properties.Valid ? properties : IniProperties.Default;
             Name = fileName;
-            if (File.Exists(fileName)) Load(IniReader.FromFile(fileName));
-            else File.Open(fileName, FileMode.OpenOrCreate).Close();
+            if (File.Exists(fileName))
+            {
+                Load(IniReader.FromFile(fileName));
+            }
+            else
+            {
+                File.Open(fileName, FileMode.OpenOrCreate).Close();
+            }
         }
 
         /// <summary>
@@ -188,12 +199,19 @@ namespace Cave.IO
         /// </summary>
         public IniWriter(ISettings reader)
         {
-            if (reader == null) throw new ArgumentNullException("reader");
+            if (reader == null)
+            {
+                throw new ArgumentNullException("reader");
+            }
+
             Name = reader.Name;
             if (reader is IniReader)
             {
                 Properties = ((IniReader)reader).Properties;
-                if (!Properties.Valid) Properties = IniProperties.Default;
+                if (!Properties.Valid)
+                {
+                    Properties = IniProperties.Default;
+                }
             }
             else
             {
@@ -208,7 +226,11 @@ namespace Cave.IO
         /// <param name="reader">The reader to obtain the config from</param>
         public void Load(ISettings reader)
         {
-            if (reader == null) throw new ArgumentNullException("reader");
+            if (reader == null)
+            {
+                throw new ArgumentNullException("reader");
+            }
+
             foreach (string section in reader.GetSectionNames())
             {
                 m_Data[section] = new List<string>(reader.ReadSection(section, false));
@@ -221,7 +243,13 @@ namespace Cave.IO
         /// <param name="section">Name of the section</param>
         public void RemoveSection(string section)
         {
-            if (m_Data.ContainsKey(section)) if (!m_Data.Remove(section)) throw new KeyNotFoundException();
+            if (m_Data.ContainsKey(section))
+            {
+                if (!m_Data.Remove(section))
+                {
+                    throw new KeyNotFoundException();
+                }
+            }
         }
 
         /// <summary>
@@ -242,8 +270,15 @@ namespace Cave.IO
         /// <returns></returns>
         public void WriteSection(string section, IEnumerable values)
         {
-            if (section == null) throw new ArgumentNullException("section");
-            if (values == null) throw new ArgumentNullException("values");
+            if (section == null)
+            {
+                throw new ArgumentNullException("section");
+            }
+
+            if (values == null)
+            {
+                throw new ArgumentNullException("values");
+            }
 
             List<string> strings = new List<string>();
             foreach(object value in values)
@@ -261,8 +296,15 @@ namespace Cave.IO
         /// <returns></returns>
         public void WriteSection(string section, IEnumerable<string> lines)
         {
-            if (section == null) throw new ArgumentNullException("section");
-            if (lines == null) throw new ArgumentNullException("lines");
+            if (section == null)
+            {
+                throw new ArgumentNullException("section");
+            }
+
+            if (lines == null)
+            {
+                throw new ArgumentNullException("lines");
+            }
 
             List<string> result = new List<string>();
 			result.AddRange(lines);
@@ -277,8 +319,12 @@ namespace Cave.IO
         /// <param name="item">The struct</param>
         public void WriteStruct<T>(string section, T item) where T : struct
         {
-            if (section == null) throw new ArgumentNullException("section");
-			List<string> lines = new List<string>();
+            if (section == null)
+            {
+                throw new ArgumentNullException("section");
+            }
+
+            List<string> lines = new List<string>();
             foreach (FieldInfo field in item.GetType().GetFields())
             {
                 string value = StringExtensions.ToString(field.GetValue(item), Properties.Culture);
@@ -295,8 +341,16 @@ namespace Cave.IO
         /// <param name="obj">The object</param>
         public void WriteObject<T>(string section, T obj) where T : class
         {
-            if (section == null) throw new ArgumentNullException("section");
-            if (obj == null) throw new ArgumentNullException("obj");
+            if (section == null)
+            {
+                throw new ArgumentNullException("section");
+            }
+
+            if (obj == null)
+            {
+                throw new ArgumentNullException("obj");
+            }
+
             List<string> sections = new List<string>();
             foreach (FieldInfo field in obj.GetType().GetFields())
             {
@@ -325,11 +379,26 @@ namespace Cave.IO
 		/// <param name="value">Value of the setting</param>
 		public void WriteSetting(string section, string name, string value)
         {
-            if (section == null) throw new ArgumentNullException("section");
-            if (name == null) throw new ArgumentNullException("name");
-            if (value == null) throw new ArgumentNullException("value");
+            if (section == null)
+            {
+                throw new ArgumentNullException("section");
+            }
 
-            if (name.IndexOf('=') > -1) throw new ArgumentException(string.Format("Name may not contain an equal sign!"));
+            if (name == null)
+            {
+                throw new ArgumentNullException("name");
+            }
+
+            if (value == null)
+            {
+                throw new ArgumentNullException("value");
+            }
+
+            if (name.IndexOf('=') > -1)
+            {
+                throw new ArgumentException(string.Format("Name may not contain an equal sign!"));
+            }
+
             List<string> result;
             if (m_Data.ContainsKey(section))
             {
@@ -360,8 +429,12 @@ namespace Cave.IO
         /// <param name="fileName">The fileName to write to</param>
         public void Save(string fileName = null)
         {
-			if (fileName == null) fileName = Name;
-			Directory.CreateDirectory(Path.GetDirectoryName(fileName));
+			if (fileName == null)
+            {
+                fileName = Name;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(fileName));
             Stream stream = File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
             try
             {

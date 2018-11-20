@@ -54,9 +54,10 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using Cave.Compression;
+using Cave.IO;
 using Cave.Text;
 
-namespace Cave.IO
+namespace Cave
 {
 	/// <summary>
 	/// Provides a fast and simple initialization data reader class.
@@ -129,7 +130,11 @@ namespace Cave.IO
         /// <returns></returns>
         public static IniReader FromLocation(FileLocation fileLocation, IniProperties properties = default(IniProperties))
         {
-            if (fileLocation == null) fileLocation = new FileLocation(root: RootLocation.RoamingUserConfig, extension: Ini.PlatformExtension);
+            if (fileLocation == null)
+            {
+                fileLocation = new FileLocation(root: RootLocation.RoamingUserConfig, extension: Ini.PlatformExtension);
+            }
+
             string fileName = fileLocation.ToString();
             return FromFile(fileName, properties);
         }
@@ -159,8 +164,16 @@ namespace Cave.IO
         {
             get
             {
-                if (string.IsNullOrEmpty(Name)) return false;
-                if (Name.IndexOfAny(Path.GetInvalidPathChars()) > -1) return false;
+                if (string.IsNullOrEmpty(Name))
+                {
+                    return false;
+                }
+
+                if (Name.IndexOfAny(Path.GetInvalidPathChars()) > -1)
+                {
+                    return false;
+                }
+
                 try { return File.Exists(Name); }
                 catch { return false; }
             }
@@ -173,14 +186,22 @@ namespace Cave.IO
         /// <returns>Returns the index the section starts at</returns>
         int SectionStart(string section)
         {
-            if (section == null) return 0;
-			section = "[" + section + "]";
+            if (section == null)
+            {
+                return 0;
+            }
+
+            section = "[" + section + "]";
 
 			int i = 0;
             while (i < m_Lines.Length)
             {
                 string line = m_Lines[i].Trim();
-                if (string.Compare(line, section, !Properties.CaseSensitive, Properties.Culture) == 0) return i;
+                if (string.Compare(line, section, !Properties.CaseSensitive, Properties.Culture) == 0)
+                {
+                    return i;
+                }
+
                 i++;
             }
             return -1;
@@ -188,7 +209,11 @@ namespace Cave.IO
 
         string[] Parse(byte[] data)
         {
-            if (data.Length == 0) return new string[0];
+            if (data.Length == 0)
+            {
+                return new string[0];
+            }
+
             if ((Properties.Encryption == null) && (Properties.Compression == CompressionType.None))
             {
                 return Properties.Encoding.GetString(data).SplitNewLine();
@@ -248,7 +273,11 @@ namespace Cave.IO
         /// </summary>
         public override void Reload()
         {
-            if (!CanReload) throw new InvalidOperationException("Cannot reload!");
+            if (!CanReload)
+            {
+                throw new InvalidOperationException("Cannot reload!");
+            }
+
             m_Lines = Parse(File.ReadAllBytes(Name));
         }
 
@@ -308,7 +337,11 @@ namespace Cave.IO
             for (; ++i < m_Lines.Length; )
             {
                 string line = m_Lines[i];
-                if (line.StartsWith("[")) break;
+                if (line.StartsWith("["))
+                {
+                    break;
+                }
+
                 if (remove)
                 {
                     //remove comments and empty lines
@@ -317,9 +350,15 @@ namespace Cave.IO
                     {
                         //only remove if comment marker is the first character
                         string whiteSpace = line.Substring(0, comment);
-                        if (string.IsNullOrEmpty(whiteSpace) || (whiteSpace.Trim().Length == 0)) continue;
+                        if (string.IsNullOrEmpty(whiteSpace) || (whiteSpace.Trim().Length == 0))
+                        {
+                            continue;
+                        }
                     }
-                    if (line.Trim().Length == 0) continue;
+                    if (line.Trim().Length == 0)
+                    {
+                        continue;
+                    }
                 }
                 result.Add(line);
             }
@@ -336,15 +375,28 @@ namespace Cave.IO
         {
             //find section
             int i = SectionStart(section);
-            if (i < 0) return null;
+            if (i < 0)
+            {
+                return null;
+            }
             //iterate all lines
             for (++i; i < m_Lines.Length; i++)
             {
                 string line = m_Lines[i].Trim();
-                if (line.StartsWith("[") && (line.EndsWith("]"))) break;
+                if (line.StartsWith("[") && (line.EndsWith("]")))
+                {
+                    break;
+                }
                 //ignore comments
-                if (line.StartsWith("#")) continue;
-                if (line.StartsWith(";")) continue;
+                if (line.StartsWith("#"))
+                {
+                    continue;
+                }
+
+                if (line.StartsWith(";"))
+                {
+                    continue;
+                }
                 //find equal sign
                 int sign = line.IndexOf('=');
                 if (sign > -1)
@@ -354,13 +406,21 @@ namespace Cave.IO
                     if (string.Compare(settingName, name, !Properties.CaseSensitive, Properties.Culture) == 0)
                     {
                         string value = line.Substring(sign + 1).Trim();
-                        if (value.Length < 1) return "";
+                        if (value.Length < 1)
+                        {
+                            return "";
+                        }
+
                         if (value[0] == '"' || value[0] == '\'')
                         {
                             return value.UnboxText(false);
                         }
                         int comment = value.IndexOf('#');
-                        if (comment > -1) value = value.Substring(0, comment).Trim();
+                        if (comment > -1)
+                        {
+                            value = value.Substring(0, comment).Trim();
+                        }
+
                         return value;
                     }
                 }
