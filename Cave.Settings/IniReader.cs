@@ -8,15 +8,13 @@ using System.Security.Cryptography;
 using System.Text;
 using Cave.Compression;
 using Cave.FileSystem;
-using Cave.IO;
-using Cave.Text;
 
 namespace Cave
 {
-	/// <summary>
-	/// Provides a fast and simple initialization data reader class.
-	/// </summary>
-	[DebuggerDisplay("{Name}")]
+    /// <summary>
+    /// Provides a fast and simple initialization data reader class.
+    /// </summary>
+    [DebuggerDisplay("{Name}")]
     public class IniReader : SettingsReader
     {
         #region static constructors
@@ -72,7 +70,7 @@ namespace Cave
         /// <returns></returns>
         public static IniReader FromStream(string name, Stream stream, int count, IniProperties properties = default(IniProperties))
         {
-            var data = stream.ReadBlock(count);
+            byte[] data = stream.ReadBlock(count);
             return Parse(name, data, properties);
         }
 
@@ -101,7 +99,7 @@ namespace Cave
         /// <returns></returns>
         public static IniReader FromLocation(RootLocation root, IniProperties properties = default(IniProperties))
         {
-            var fileLocation = new FileLocation(root: root, extension: Ini.PlatformExtension);
+            FileLocation fileLocation = new FileLocation(root: root, extension: Ini.PlatformExtension);
             return FromLocation(fileLocation, properties);
         }
         #endregion
@@ -147,7 +145,7 @@ namespace Cave
 
             section = "[" + section + "]";
 
-			int i = 0;
+            int i = 0;
             while (i < m_Lines.Length)
             {
                 string line = m_Lines[i].Trim();
@@ -210,7 +208,7 @@ namespace Cave
         /// <summary>
         /// Gets the culture used to decode values
         /// </summary>
-        public override CultureInfo Culture { get { return Properties.Culture; } }
+        public override CultureInfo Culture => Properties.Culture;
 
         /// <summary>Loads initialization data</summary>
         /// <param name="name">The (file)name.</param>
@@ -288,7 +286,7 @@ namespace Cave
             }
             //got it, add lines to result
             List<string> result = new List<string>();
-            for (; ++i < m_Lines.Length; )
+            for (; ++i < m_Lines.Length;)
             {
                 string line = m_Lines[i];
                 if (line.StartsWith("["))
