@@ -7,7 +7,6 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using Cave.Compression;
-using Cave.FileSystem;
 
 namespace Cave
 {

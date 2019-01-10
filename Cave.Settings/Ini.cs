@@ -1,6 +1,4 @@
-﻿using Cave.Compression;
-using Cave.FileSystem;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,6 +8,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
+using Cave.Compression;
 
 namespace Cave
 {
@@ -26,13 +25,7 @@ namespace Cave
 
         /// <summary>Gets the default ini file.</summary>
         /// <value>The default ini file.</value>
-        public static Ini Default
-        {
-            get
-            {
-                return UserIniFile;
-            }
-        }
+        public static Ini Default => UserIniFile;
 
         /// <summary>Gets the local user ini file.</summary>
         /// <value>The local user ini file.</value>
@@ -42,7 +35,7 @@ namespace Cave
             {
                 if (m_LocalUserIniFile == null)
                 {
-                    var location = new FileLocation(root: RootLocation.LocalUserConfig, extension: PlatformExtension);
+                    FileLocation location = new FileLocation(root: RootLocation.LocalUserConfig, extension: PlatformExtension);
                     m_LocalUserIniFile = new Ini(IniReader.FromLocation(location));
                 }
                 return m_LocalUserIniFile;
@@ -57,7 +50,7 @@ namespace Cave
             {
                 if (m_LocalMachineIniFile == null)
                 {
-                    var location = new FileLocation(root: RootLocation.AllUserConfig, extension: PlatformExtension);
+                    FileLocation location = new FileLocation(root: RootLocation.AllUserConfig, extension: PlatformExtension);
                     m_LocalMachineIniFile = new Ini(IniReader.FromLocation(location));
                 }
                 return m_LocalMachineIniFile;
@@ -72,7 +65,7 @@ namespace Cave
             {
                 if (m_UserIniFile == null)
                 {
-                    var location = new FileLocation(root: RootLocation.RoamingUserConfig, extension: PlatformExtension);
+                    FileLocation location = new FileLocation(root: RootLocation.RoamingUserConfig, extension: PlatformExtension);
                     m_UserIniFile = new Ini(IniReader.FromLocation(location));
                 }
                 return m_UserIniFile;
@@ -87,7 +80,7 @@ namespace Cave
             {
                 if (m_ProgramIniFile == null)
                 {
-                    var location = new FileLocation(root: RootLocation.Program, extension: PlatformExtension);
+                    FileLocation location = new FileLocation(root: RootLocation.Program, extension: PlatformExtension);
                     m_ProgramIniFile = new Ini(IniReader.FromLocation(location));
                 }
                 return m_ProgramIniFile;
@@ -116,35 +109,35 @@ namespace Cave
         }
 
         /// <summary>Checks whether the config can be reloaded</summary>
-        public override bool CanReload { get { return true; } }
+        public override bool CanReload => true;
 
         /// <summary>Gets the culture used to decode values</summary>
-        public override CultureInfo Culture { get { return Properties.Culture; } }
+        public override CultureInfo Culture => Properties.Culture;
 
         /// <summary>Gets the properties.</summary>
         /// <value>The properties.</value>
         public IniProperties Properties { get; set; }
 
-		[DebuggerDisplay("{Name} = {Value}")]
-		class Item
-		{
-			string name, val;
-			public string Name { get => name; set => name = value.Trim(); }
-			public string Value { get => val; set => val = value?.Trim(); }
-		}
-		[DebuggerDisplay("{Name} [{Items.Count}]")]
-		class Section
-		{
-			string name;
-			public string Name { get => name; set => name = value.Trim(); }
-			public List<Item> Items = new List<Item>();
-		}
-		List<Section> m_Sections = new List<Section>();
+        [DebuggerDisplay("{Name} = {Value}")]
+        class Item
+        {
+            string name, val;
+            public string Name { get => name; set => name = value.Trim(); }
+            public string Value { get => val; set => val = value?.Trim(); }
+        }
+        [DebuggerDisplay("{Name} [{Items.Count}]")]
+        class Section
+        {
+            string name;
+            public string Name { get => name; set => name = value.Trim(); }
+            public List<Item> Items = new List<Item>();
+        }
+        List<Section> m_Sections = new List<Section>();
 
-		Section GetSection(string name)
-		{
-			return m_Sections.FirstOrDefault(s => string.Equals(s.Name, name, StringComparison.CurrentCultureIgnoreCase));
-		}
+        Section GetSection(string name)
+        {
+            return m_Sections.FirstOrDefault(s => string.Equals(s.Name, name, StringComparison.CurrentCultureIgnoreCase));
+        }
 
         /// <summary>Initializes a new instance of the <see cref="Ini"/> class.</summary>
         /// <param name="reader">The reader.</param>
@@ -171,7 +164,7 @@ namespace Cave
         /// <returns>Returns an array of all section names</returns>
         public override string[] GetSectionNames()
         {
-			return m_Sections.Select(s => s.Name).ToArray();
+            return m_Sections.Select(s => s.Name).ToArray();
         }
 
         /// <summary>Obtains whether a specified section exists or not</summary>
@@ -179,20 +172,20 @@ namespace Cave
         /// <returns>Returns true if the sections exists false otherwise</returns>
         public override bool HasSection(string section)
         {
-			return GetSection(section) != null;
-		}
+            return GetSection(section) != null;
+        }
 
-		/// <summary>Reads a whole section from the settings</summary>
-		/// <param name="sectionName">Name of the section</param>
-		/// <param name="remove">Remove comments and empty lines</param>
-		/// <returns>Returns the whole section as string array</returns>
-		public override string[] ReadSection(string sectionName, bool remove)
+        /// <summary>Reads a whole section from the settings</summary>
+        /// <param name="sectionName">Name of the section</param>
+        /// <param name="remove">Remove comments and empty lines</param>
+        /// <returns>Returns the whole section as string array</returns>
+        public override string[] ReadSection(string sectionName, bool remove)
         {
             List<string> result = new List<string>();
-			var section = GetSection(sectionName);
-			if (section != null)
+            Section section = GetSection(sectionName);
+            if (section != null)
             {
-                foreach (var item in section.Items)
+                foreach (Item item in section.Items)
                 {
                     string name = item.Name.Trim();
                     if (remove && (name.StartsWith("#") || name.StartsWith(";")))
@@ -213,33 +206,33 @@ namespace Cave
             return result.ToArray();
         }
 
-		/// <summary>Reads a setting from the settings</summary>
-		/// <param name="sectionName">Sectionname of the setting</param>
-		/// <param name="name">Name of the setting</param>
-		/// <returns>Returns null if the setting is not present a string otherwise</returns>
-		public override string ReadSetting(string sectionName, string name)
-		{
-			var section = GetSection(sectionName);
-			if (section != null)
-			{
-				var item = section.Items.FirstOrDefault(i => string.Equals(i.Name, name, StringComparison.CurrentCultureIgnoreCase));
-				if (item != null)
-				{
-					return item.Value?.Trim();
-				}
-			}
-			return null;
-		}
+        /// <summary>Reads a setting from the settings</summary>
+        /// <param name="sectionName">Sectionname of the setting</param>
+        /// <param name="name">Name of the setting</param>
+        /// <returns>Returns null if the setting is not present a string otherwise</returns>
+        public override string ReadSetting(string sectionName, string name)
+        {
+            Section section = GetSection(sectionName);
+            if (section != null)
+            {
+                Item item = section.Items.FirstOrDefault(i => string.Equals(i.Name, name, StringComparison.CurrentCultureIgnoreCase));
+                if (item != null)
+                {
+                    return item.Value?.Trim();
+                }
+            }
+            return null;
+        }
 
         /// <summary>Loads all sections from the specified reader.</summary>
         /// <param name="reader">The reader.</param>
         /// <exception cref="System.IO.FileNotFoundException"></exception>
         public void Load(ISettings reader)
         {
-			m_Sections.Clear();
+            m_Sections.Clear();
             foreach (string section in reader.GetSectionNames())
             {
-				WriteSection(section, reader.ReadSection(section));
+                WriteSection(section, reader.ReadSection(section));
             }
         }
 
@@ -253,8 +246,8 @@ namespace Cave
         /// <param name="sectionName">Name of the section</param>
         public void RemoveSection(string sectionName)
         {
-			var section = GetSection(sectionName);
-			m_Sections.Remove(section);
+            Section section = GetSection(sectionName);
+            m_Sections.Remove(section);
         }
 
         /// <summary>
@@ -312,48 +305,48 @@ namespace Cave
             }
 
             Section newSection = new Section() { Name = sectionName };
-			foreach (string line in lines)
-			{
-				int i = line.IndexOf('=');
-				if (i > -1)
-				{
-					newSection.Items.Add(new Item() { Name = line.Substring(0, i), Value = line.Substring(i + 1) });
-				}
-				else
-				{
-					newSection.Items.Add(new Item() { Name = line, });
-				}
-			}
-			Section section = GetSection(sectionName);
-			if (section != null)
-			{
-				//replace
-				int i = m_Sections.IndexOf(section);
-				m_Sections[i] = newSection;
-			}
-			else
-			{
-				//add
-				m_Sections.Add(newSection);
-			}
+            foreach (string line in lines)
+            {
+                int i = line.IndexOf('=');
+                if (i > -1)
+                {
+                    newSection.Items.Add(new Item() { Name = line.Substring(0, i), Value = line.Substring(i + 1) });
+                }
+                else
+                {
+                    newSection.Items.Add(new Item() { Name = line, });
+                }
+            }
+            Section section = GetSection(sectionName);
+            if (section != null)
+            {
+                //replace
+                int i = m_Sections.IndexOf(section);
+                m_Sections[i] = newSection;
+            }
+            else
+            {
+                //add
+                m_Sections.Add(newSection);
+            }
         }
 
-		/// <summary>
-		/// Writes all fields of the struct to the specified section (replacing a present one) 
-		/// </summary>
-		/// <typeparam name="T">The struct type</typeparam>
-		/// <param name="sectionName">The section to write to</param>
-		/// <param name="item">The struct</param>
-		public void WriteStruct<T>(string sectionName, T item) where T : struct
-		{
-			List<string> newSection = new List<string>();
-			foreach (FieldInfo field in item.GetType().GetFields())
-			{
-				string value = StringExtensions.ToString(field.GetValue(item), Culture);
-				newSection.Add(field.Name + " = " + value);
-			}
-			WriteSection(sectionName, newSection);
-		}
+        /// <summary>
+        /// Writes all fields of the struct to the specified section (replacing a present one) 
+        /// </summary>
+        /// <typeparam name="T">The struct type</typeparam>
+        /// <param name="sectionName">The section to write to</param>
+        /// <param name="item">The struct</param>
+        public void WriteStruct<T>(string sectionName, T item) where T : struct
+        {
+            List<string> newSection = new List<string>();
+            foreach (FieldInfo field in item.GetType().GetFields())
+            {
+                string value = StringExtensions.ToString(field.GetValue(item), Culture);
+                newSection.Add(field.Name + " = " + value);
+            }
+            WriteSection(sectionName, newSection);
+        }
 
         /// <summary>
         /// Writes all fields of the object to the specified section (replacing a present one) 
@@ -369,32 +362,32 @@ namespace Cave
             }
 
             List<string> newSection = new List<string>();
-			foreach (FieldInfo field in obj.GetType().GetFields())
+            foreach (FieldInfo field in obj.GetType().GetFields())
             {
                 string value = StringExtensions.ToString(field.GetValue(obj), Culture);
-				newSection.Add(field.Name + " = " + value);
-			}
-			WriteSection(sectionName, newSection);
-		}
+                newSection.Add(field.Name + " = " + value);
+            }
+            WriteSection(sectionName, newSection);
+        }
 
-		/// <summary>
-		/// Writes a setting to the ini file (replacing a present one) 
-		/// </summary>
-		/// <param name="section">Name of the section</param>
-		/// <param name="name">Name of the setting</param>
-		/// <param name="value">Value of the setting</param>
-		public void WriteSetting(string section, string name, object value)
-		{
-			WriteSetting(section, name, StringExtensions.ToString(value, Culture));
-		}
+        /// <summary>
+        /// Writes a setting to the ini file (replacing a present one) 
+        /// </summary>
+        /// <param name="section">Name of the section</param>
+        /// <param name="name">Name of the setting</param>
+        /// <param name="value">Value of the setting</param>
+        public void WriteSetting(string section, string name, object value)
+        {
+            WriteSetting(section, name, StringExtensions.ToString(value, Culture));
+        }
 
-		/// <summary>
-		/// Writes a setting to the ini file (replacing a present one) 
-		/// </summary>
-		/// <param name="sectionName">Name of the section</param>
-		/// <param name="name">Name of the setting</param>
-		/// <param name="value">Value of the setting</param>
-		public void WriteSetting(string sectionName, string name, string value)
+        /// <summary>
+        /// Writes a setting to the ini file (replacing a present one) 
+        /// </summary>
+        /// <param name="sectionName">Name of the section</param>
+        /// <param name="name">Name of the setting</param>
+        /// <param name="value">Value of the setting</param>
+        public void WriteSetting(string sectionName, string name, string value)
         {
             if (sectionName == null)
             {
@@ -411,19 +404,19 @@ namespace Cave
                 throw new ArgumentException(string.Format("Name may not contain an equal sign!"));
             }
 
-            var section = GetSection(sectionName);
-			if (section == null)
-			{
-				section = new Section() { Name = sectionName };
-				m_Sections.Add(section);
-			}
-			var item = section.Items.FirstOrDefault(i => string.Equals(i.Name, name, StringComparison.CurrentCultureIgnoreCase));
-			if (item == null)
-			{
-				item = new Item() { Name = name };
-				section.Items.Add(item);
-			}
-			item.Value = value;
+            Section section = GetSection(sectionName);
+            if (section == null)
+            {
+                section = new Section() { Name = sectionName };
+                m_Sections.Add(section);
+            }
+            Item item = section.Items.FirstOrDefault(i => string.Equals(i.Name, name, StringComparison.CurrentCultureIgnoreCase));
+            if (item == null)
+            {
+                item = new Item() { Name = name };
+                section.Items.Add(item);
+            }
+            item.Value = value;
         }
 
         /// <summary>
@@ -431,8 +424,8 @@ namespace Cave
         /// </summary>
         public void Save()
         {
-			try { File.Open(Name, FileMode.OpenOrCreate).Close(); }
-			catch (Exception ex) { throw new InvalidOperationException("You can use the Save() function only when 'Name' is the Path of the loaded file.", ex); }
+            try { File.Open(Name, FileMode.OpenOrCreate).Close(); }
+            catch (Exception ex) { throw new InvalidOperationException("You can use the Save() function only when 'Name' is the Path of the loaded file.", ex); }
             Stream stream = File.Open(Name, FileMode.Create, FileAccess.Write, FileShare.None);
             try
             {
@@ -453,10 +446,10 @@ namespace Cave
                 }
 
                 StreamWriter writer = new StreamWriter(stream, Properties.Encoding);
-                foreach (var section in m_Sections)
+                foreach (Section section in m_Sections)
                 {
                     writer.WriteLine("[" + section.Name + "]");
-                    foreach (var setting in section.Items)
+                    foreach (Item setting in section.Items)
                     {
                         if (setting.Value == null)
                         {
