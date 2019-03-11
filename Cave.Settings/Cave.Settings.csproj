@@ -1,53 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net20;net35;net45</TargetFrameworks>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <TargetFrameworks>netstandard2.0;net20;net35;net45;net46;net47</TargetFrameworks>
     <Authors>Andreas Rohleder</Authors>
     <Company>CaveSystems GmbH, Andreas Rohleder</Company>
-    <Product>CaveSystems Settings Library</Product>
-    <Copyright>(c) 2003-2018 Andreas Rohleder</Copyright>
-    <PackageLicenseUrl>https://www.gnu.org/licenses/lgpl-3.0.en.html</PackageLicenseUrl>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Cave.Settings.snk</AssemblyOriginatorKeyFile>
-    <Version>1.0.2</Version>
+    <Copyright>(c) 2003-$([System.DateTime]::UtcNow.Year) Andreas Rohleder</Copyright>
     <PackageIconUrl>https://www.cavesystems.de/favicon.ico</PackageIconUrl>
-    <PackageTags>CaveSystems Settings ini conf</PackageTags>
+    <PackageLicenseExpression>LGPL-3.0-only</PackageLicenseExpression>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <FileVersion>$([System.DateTime]::UtcNow.Year).$([System.DateTime]::UtcNow.ToString("MMdd")).$([System.DateTime]::UtcNow.ToString("HHmm")).$([System.DateTime]::UtcNow.ToString("ssfff"))</FileVersion>
+    <LangVersion>latest</LangVersion>
+    <!--project-->
+    <RootNamespace>Cave.Settings</RootNamespace>
+    <AssemblyOriginatorKeyFile>Cave.Settings.snk</AssemblyOriginatorKeyFile>
+    <Product>CaveSystems Settings Library</Product>
+    <PackageTags>CaveSystems Settings Configuration IniFile IniReader IniWriter</PackageTags>
+    <Description>CaveSystems Settings Bibliothek. This packages contains classes for ini(tialization file) based configurations.</Description>
     <PackageProjectUrl>https://github.com/CaveSystems/cave-settings</PackageProjectUrl>
-    <PackageReleaseNotes>Aktueller Release Candidate 2018</PackageReleaseNotes>
-    <Description>
-    </Description>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Cave.Settings.xml</DocumentationFile>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>1.0.2</AssemblyVersion>
-    <FileVersion>2019.110.1818.151</FileVersion>
+    <RepositoryUrl>https://github.com/CaveSystems/cave-settings</RepositoryUrl>
+    <!--settings-->
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>pdbonly</DebugType>
-    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;DEBUG;</DefineConstants>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <IncludeSymbols>true</IncludeSymbols>
-    <IncludeSymbolsInPackage>true</IncludeSymbolsInPackage>
-    <EmbedSources>true</EmbedSources>
   </PropertyGroup>
-  <!-- Workaround for EmbedSources support, see https://github.com/dotnet/roslyn/issues/19127-->
-  <Target Condition="'$(Configuration)'=='Debug'" Name="PopulateEmbeddedFiles" AfterTargets="BeforeCompile" BeforeTargets="CoreCompile">
-    <ItemGroup>
-      <EmbeddedFiles Include="@(Compile)" />
-    </ItemGroup>
-  </Target>
   <PropertyGroup>
     <DefineConstants Condition=" !$(DefineConstants.Contains(';NET')) ">$(DefineConstants);NET$(TargetFramework.ToUpper().Replace("_", "").Replace(".", "").Replace("NET", ""))</DefineConstants>
     <DefineConstants Condition=" $(DefineConstants.Contains(';NET')) ">$(DefineConstants.Remove($(DefineConstants.LastIndexOf(";NET"))));NET$(TargetFramework.ToUpper().Replace("_", "").Replace(".", "").Replace("NET", ""))</DefineConstants>
-    <NeutralLanguage />
-    <RootNamespace>Cave</RootNamespace>
-    <DelaySign>false</DelaySign>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net40' OR '$(TargetFramework)'=='net45' OR '$(TargetFramework)'=='net46' OR '$(TargetFramework)'=='net471'">
     <Reference Include="System" />
@@ -72,13 +51,13 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net20' OR '$(TargetFramework)'=='netstandard1.3'">
-    <PackageReference Include="Cave.Backports" Version="1.0.1" />
+    <PackageReference Include="Cave.Backports" Version="1.0.3" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Cave.AssemblyVersionInfo" Version="1.0.0" />
-    <PackageReference Include="Cave.Compression" Version="1.0.0" />
-    <PackageReference Include="Cave.Extensions" Version="1.0.1" />
-    <PackageReference Include="Cave.FileSystem" Version="1.1.0" />
-    <PackageReference Include="Cave.Platform" Version="1.0.0" />
+    <PackageReference Include="Cave.AssemblyVersionInfo" Version="1.0.2" />
+    <PackageReference Include="Cave.Compression" Version="1.0.1" />
+    <PackageReference Include="Cave.Extensions" Version="1.0.5" />
+    <PackageReference Include="Cave.FileSystem" Version="1.1.1" />
+    <PackageReference Include="Cave.Platform" Version="1.0.1" />
   </ItemGroup>
 </Project>
