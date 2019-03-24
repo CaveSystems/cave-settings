@@ -19,68 +19,69 @@ namespace Cave
         public SettingsReader(string name) { Name = name; }
 
         #region abstract class
+
         /// <summary>
-        /// Checks whether the config can be reloaded
+        /// Checks whether the config can be reloaded.
         /// </summary>
         public abstract bool CanReload { get; }
 
         /// <summary>
-        /// Reload the whole config
+        /// Reload the whole config.
         /// </summary>
         public abstract void Reload();
 
         /// <summary>
-        /// Gets the culture used to decode values
+        /// Gets the culture used to decode values.
         /// </summary>
         public abstract CultureInfo Culture { get; }
 
         /// <summary>
-        /// Obtains all section names present at the file
+        /// Obtains all section names present at the file.
         /// </summary>
         /// <returns>
-        /// Returns an array of all section names
+        /// Returns an array of all section names.
         /// </returns>
         public abstract string[] GetSectionNames();
 
         /// <summary>
-        /// Obtains whether a specified section exists or not
+        /// Obtains whether a specified section exists or not.
         /// </summary>
-        /// <param name="section">Section to search</param>
+        /// <param name="section">Section to search.</param>
         /// <returns>
-        /// Returns true if the sections exists false otherwise
+        /// Returns true if the sections exists false otherwise.
         /// </returns>
         public abstract bool HasSection(string section);
 
         /// <summary>
-        /// Reads a whole section from the settings
+        /// Reads a whole section from the settings.
         /// </summary>
-        /// <param name="section">Name of the section</param>
-        /// <param name="remove">Remove comments and empty lines</param>
+        /// <param name="section">Name of the section.</param>
+        /// <param name="remove">Remove comments and empty lines.</param>
         /// <returns>
-        /// Returns the whole section as string array
+        /// Returns the whole section as string array.
         /// </returns>
         public abstract string[] ReadSection(string section, bool remove);
 
         /// <summary>
-        /// Reads a setting from the settings
+        /// Reads a setting from the settings.
         /// </summary>
-        /// <param name="section">Sectionname of the setting</param>
-        /// <param name="name">Name of the setting</param>
+        /// <param name="section">Sectionname of the setting.</param>
+        /// <param name="name">Name of the setting.</param>
         /// <returns>
-        /// Returns null if the setting is not present a string otherwise
+        /// Returns null if the setting is not present a string otherwise.
         /// </returns>
         public abstract string ReadSetting(string section, string name);
         #endregion
 
         /// <summary>
-        /// Name of the settings
+        /// Name of the settings.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// Reads a whole section from the ini (automatically removes empty lines and comments)
+        /// Reads a whole section from the ini (automatically removes empty lines and comments).
         /// </summary>
-        /// <param name="section">Name of the section</param>
+        /// <param name="section">Name of the section.</param>
         public string[] ReadSection(string section)
         {
             return ReadSection(section, true);
@@ -89,17 +90,18 @@ namespace Cave
         /// <summary>
         /// Reads a whole section as values of an enum and returns them as array.
         /// </summary>
-        /// <typeparam name="T">The enum type</typeparam>
-        /// <param name="section">The Section to read</param>
-        /// <param name="throwEx">Throw an error for any unknown value in the section</param>
-        /// <returns>Returns an array of values</returns>
-        public T[] ReadEnums<T>(string section, bool throwEx = true) where T : struct
+        /// <typeparam name="T">The enum type.</typeparam>
+        /// <param name="section">The Section to read.</param>
+        /// <param name="throwEx">Throw an error for any unknown value in the section.</param>
+        /// <returns>Returns an array of values.</returns>
+        public T[] ReadEnums<T>(string section, bool throwEx = true)
+            where T : struct
         {
-            //iterate all lines of the section
-            List<T> result = new List<T>();
+            // iterate all lines of the section
+            var result = new List<T>();
             foreach (string value in ReadSection(section, true))
             {
-                //try to parse enum value 
+                // try to parse enum value
                 try { result.Add((T)Enum.Parse(typeof(T), value.Trim(), true)); }
                 catch (Exception ex)
                 {
@@ -115,26 +117,28 @@ namespace Cave
         }
 
         /// <summary>
-        /// Reads a whole section as values of a struct
+        /// Reads a whole section as values of a struct.
         /// </summary>
-        /// <typeparam name="T">The type of the struct</typeparam>
-        /// <param name="section">Section to read</param>
-        /// <param name="throwEx">Throw an error for any unset value in the section</param>
-        /// <returns>Returns a new struct instance</returns>
-        public T ReadStruct<T>(string section, bool throwEx = true) where T : struct
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns a new struct instance.</returns>
+        public T ReadStruct<T>(string section, bool throwEx = true)
+            where T : struct
         {
             object result = new T();
             ReadObject(section, result, throwEx);
             return (T)result;
         }
 
-        /// <summary>Reads a whole section as values of a struct</summary>
-        /// <typeparam name="T">The type of the struct</typeparam>
-        /// <param name="section">Section to read</param>
-        /// <param name="throwEx">Throw an error for any unset value in the section</param>
+        /// <summary>Reads a whole section as values of a struct.</summary>
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <param name="item">The structure.</param>
         /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
-        public bool ReadStruct<T>(string section, ref T item, bool throwEx = true) where T : struct
+        public bool ReadStruct<T>(string section, ref T item, bool throwEx = true)
+            where T : struct
         {
             object box = item;
             var result = ReadObject(section, box, throwEx);
@@ -143,13 +147,14 @@ namespace Cave
         }
 
         /// <summary>
-        /// Reads a whole section as values of a struct
+        /// Reads a whole section as values of a struct.
         /// </summary>
-        /// <typeparam name="T">The type of the struct</typeparam>
-        /// <param name="section">Section to read</param>
-        /// <param name="throwEx">Throw an error for any invalid value in the section</param>
-        /// <returns>Returns a new struct instance</returns>
-        public T ReadObject<T>(string section, bool throwEx) where T : class, new()
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="throwEx">Throw an error for any invalid value in the section.</param>
+        /// <returns>Returns a new struct instance.</returns>
+        public T ReadObject<T>(string section, bool throwEx)
+            where T : class, new()
         {
             object result = new T();
             ReadObject(section, result, throwEx);
@@ -157,11 +162,11 @@ namespace Cave
         }
 
         /// <summary>
-        /// Reads a whole section as values of an object (this does not work with structs)
+        /// Reads a whole section as values of an object (this does not work with structs).
         /// </summary>
-        /// <param name="section">Section to read</param>
-        /// <param name="throwEx">Throw an error for any unset value in the section</param>
-        /// <param name="container">Container to set the field at</param>
+        /// <param name="section">Section to read.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <param name="container">Container to set the field at.</param>
         /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
         public bool ReadObject(string section, object container, bool throwEx = false)
         {
@@ -169,7 +174,8 @@ namespace Cave
             {
                 throw new ArgumentNullException("container");
             }
-            //iterate all fields of the struct
+
+            // iterate all fields of the struct
             Type type = container.GetType();
             FieldInfo[] fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
             if (fields.Length == 0)
@@ -187,7 +193,7 @@ namespace Cave
             {
                 i++;
 
-                //yes, can we read a value from the config for this field ?
+                // yes, can we read a value from the config for this field ?
                 string value = ReadSetting(section, field.Name);
                 if (string.IsNullOrEmpty(value))
                 {
@@ -196,7 +202,7 @@ namespace Cave
                 }
                 value = value.UnboxText(false);
 
-                //yes, try to set value to field
+                // yes, try to set value to field
                 try
                 {
                     object obj = Convert.ChangeType(value, field.FieldType, Culture);
@@ -234,13 +240,13 @@ namespace Cave
             return result;
         }
 
-        #region Read Value Members     
+        #region Read Value Members
 
         /// <summary>Reads a string value.</summary>
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
-        /// <param name="defaultValue">The default value</param>
-        /// <returns>Returns the (converted) value if a value is present or the default value if not</returns>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns>Returns the (converted) value if a value is present or the default value if not.</returns>
         public string ReadString(string section, string name, string defaultValue = null)
         {
             string result = null;
@@ -254,8 +260,8 @@ namespace Cave
         /// <summary>Reads a bool value.</summary>
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
-        /// <param name="defaultValue">The default value</param>
-        /// <returns>Returns the (converted) value if a value is present or the default value if not</returns>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns>Returns the (converted) value if a value is present or the default value if not.</returns>
         public bool ReadBool(string section, string name, bool? defaultValue = null)
         {
             bool result = false;
@@ -274,7 +280,7 @@ namespace Cave
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns>Returns the (converted) value if a value is present or the default value if not</returns>
+        /// <returns>Returns the (converted) value if a value is present or the default value if not.</returns>
         public int ReadInt32(string section, string name, int? defaultValue = null)
         {
             int result = 0;
@@ -293,7 +299,7 @@ namespace Cave
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns>Returns the (converted) value if a value is present or the default value if not</returns>
+        /// <returns>Returns the (converted) value if a value is present or the default value if not.</returns>
         public uint ReadUInt32(string section, string name, uint? defaultValue = null)
         {
             uint result = 0;
@@ -312,7 +318,7 @@ namespace Cave
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns>Returns the (converted) value if a value is present or the default value if not</returns>
+        /// <returns>Returns the (converted) value if a value is present or the default value if not.</returns>
         public long ReadInt64(string section, string name, long? defaultValue = null)
         {
             long result = 0;
@@ -331,7 +337,7 @@ namespace Cave
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns>Returns the (converted) value if a value is present or the default value if not</returns>
+        /// <returns>Returns the (converted) value if a value is present or the default value if not.</returns>
         public ulong ReadUInt64(string section, string name, ulong? defaultValue = null)
         {
             ulong result = 0;
@@ -350,7 +356,7 @@ namespace Cave
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns>Returns the (converted) value if a value is present or the default value if not</returns>
+        /// <returns>Returns the (converted) value if a value is present or the default value if not.</returns>
         public float ReadFloat(string section, string name, float? defaultValue = null)
         {
             float result = 0;
@@ -365,12 +371,11 @@ namespace Cave
             return result;
         }
 
-
         /// <summary>Reads a double value.</summary>
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns>Returns the (converted) value if a value is present or the default value if not</returns>
+        /// <returns>Returns the (converted) value if a value is present or the default value if not.</returns>
         public double ReadDouble(string section, string name, double? defaultValue = null)
         {
             double result = 0;
@@ -389,7 +394,7 @@ namespace Cave
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns>Returns the (converted) value if a value is present or the default value if not</returns>
+        /// <returns>Returns the (converted) value if a value is present or the default value if not.</returns>
         public decimal ReadDecimal(string section, string name, decimal? defaultValue = null)
         {
             decimal result = 0;
@@ -408,7 +413,7 @@ namespace Cave
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns>Returns the (converted) value if a value is present or the default value if not</returns>
+        /// <returns>Returns the (converted) value if a value is present or the default value if not.</returns>
         public TimeSpan ReadTimeSpan(string section, string name, TimeSpan? defaultValue = null)
         {
             TimeSpan result = TimeSpan.Zero;
@@ -427,7 +432,7 @@ namespace Cave
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns>Returns the (converted) value if a value is present or the default value if not</returns>
+        /// <returns>Returns the (converted) value if a value is present or the default value if not.</returns>
         public DateTime ReadDateTime(string section, string name, DateTime? defaultValue = null)
         {
             DateTime result = DateTime.MinValue;
@@ -447,10 +452,11 @@ namespace Cave
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns>Returns the (converted) value if a value is present or the default value if not</returns>
-        public T ReadEnum<T>(string section, string name, T? defaultValue = null) where T : struct, IConvertible
+        /// <returns>Returns the (converted) value if a value is present or the default value if not.</returns>
+        public T ReadEnum<T>(string section, string name, T? defaultValue = null)
+            where T : struct, IConvertible
         {
-            T result = default(T);
+            var result = default(T);
             if (!GetEnum(section, name, ref result))
             {
                 if (!defaultValue.HasValue)
@@ -466,12 +472,12 @@ namespace Cave
         #region GetValue Members
 
         /// <summary>
-        /// Directly obtains a value from the specified subsection(s) with the specified name
+        /// Directly obtains a value from the specified subsection(s) with the specified name.
         /// </summary>
-        /// <param name="section">The subsection(s)</param>
-        /// <param name="name">The name of the setting</param>
-        /// <param name="value">The default value</param>
-        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned)</returns>
+        /// <param name="section">The subsection(s).</param>
+        /// <param name="name">The name of the setting.</param>
+        /// <param name="value">The default value.</param>
+        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned).</returns>
         public bool GetValue(string section, string name, ref bool value)
         {
             string v = ReadSetting(section, name);
@@ -487,12 +493,12 @@ namespace Cave
         }
 
         /// <summary>
-        /// Directly obtains a value from the specified subsection(s) with the specified name
+        /// Directly obtains a value from the specified subsection(s) with the specified name.
         /// </summary>
-        /// <param name="section">The subsection(s)</param>
-        /// <param name="name">The name of the setting</param>
-        /// <param name="value">The default value</param>
-        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned)</returns>
+        /// <param name="section">The subsection(s).</param>
+        /// <param name="name">The name of the setting.</param>
+        /// <param name="value">The default value.</param>
+        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned).</returns>
         public bool GetValue(string section, string name, ref string value)
         {
             string v = ReadSetting(section, name);
@@ -506,12 +512,12 @@ namespace Cave
         }
 
         /// <summary>
-        /// Directly obtains a value from the specified subsection(s) with the specified name
+        /// Directly obtains a value from the specified subsection(s) with the specified name.
         /// </summary>
-        /// <param name="section">The subsection(s)</param>
-        /// <param name="name">The name of the setting</param>
-        /// <param name="value">The default value</param>
-        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned)</returns>
+        /// <param name="section">The subsection(s).</param>
+        /// <param name="name">The name of the setting.</param>
+        /// <param name="value">The default value.</param>
+        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned).</returns>
         public bool GetValue(string section, string name, ref int value)
         {
             string data = value.ToString(Culture);
@@ -529,12 +535,12 @@ namespace Cave
         }
 
         /// <summary>
-        /// Directly obtains a value from the specified subsection(s) with the specified name
+        /// Directly obtains a value from the specified subsection(s) with the specified name.
         /// </summary>
-        /// <param name="section">The subsection(s)</param>
-        /// <param name="name">The name of the setting</param>
-        /// <param name="value">The default value</param>
-        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned)</returns>
+        /// <param name="section">The subsection(s).</param>
+        /// <param name="name">The name of the setting.</param>
+        /// <param name="value">The default value.</param>
+        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned).</returns>
         public bool GetValue(string section, string name, ref uint value)
         {
             string data = value.ToString(Culture);
@@ -552,12 +558,12 @@ namespace Cave
         }
 
         /// <summary>
-        /// Directly obtains a value from the specified subsection(s) with the specified name
+        /// Directly obtains a value from the specified subsection(s) with the specified name.
         /// </summary>
-        /// <param name="section">The subsection(s)</param>
-        /// <param name="name">The name of the setting</param>
-        /// <param name="value">The default value</param>
-        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned)</returns>
+        /// <param name="section">The subsection(s).</param>
+        /// <param name="name">The name of the setting.</param>
+        /// <param name="value">The default value.</param>
+        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned).</returns>
         public bool GetValue(string section, string name, ref long value)
         {
             string data = value.ToString(Culture);
@@ -575,12 +581,12 @@ namespace Cave
         }
 
         /// <summary>
-        /// Directly obtains a value from the specified subsection(s) with the specified name
+        /// Directly obtains a value from the specified subsection(s) with the specified name.
         /// </summary>
-        /// <param name="section">The subsection(s)</param>
-        /// <param name="name">The name of the setting</param>
-        /// <param name="value">The default value</param>
-        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned)</returns>
+        /// <param name="section">The subsection(s).</param>
+        /// <param name="name">The name of the setting.</param>
+        /// <param name="value">The default value.</param>
+        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned).</returns>
         public bool GetValue(string section, string name, ref ulong value)
         {
             string data = value.ToString(Culture);
@@ -596,13 +602,14 @@ namespace Cave
             }
             return false;
         }
+
         /// <summary>
-        /// Directly obtains a value from the specified subsection(s) with the specified name
+        /// Directly obtains a value from the specified subsection(s) with the specified name.
         /// </summary>
-        /// <param name="section">The subsection(s)</param>
-        /// <param name="name">The name of the setting</param>
-        /// <param name="value">The default value</param>
-        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned)</returns>
+        /// <param name="section">The subsection(s).</param>
+        /// <param name="name">The name of the setting.</param>
+        /// <param name="value">The default value.</param>
+        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned).</returns>
         public bool GetValue(string section, string name, ref float value)
         {
             string data = value.ToString("R", Culture);
@@ -620,12 +627,12 @@ namespace Cave
         }
 
         /// <summary>
-        /// Directly obtains a value from the specified subsection(s) with the specified name
+        /// Directly obtains a value from the specified subsection(s) with the specified name.
         /// </summary>
-        /// <param name="section">The subsection(s)</param>
-        /// <param name="name">The name of the setting</param>
-        /// <param name="value">The default value</param>
-        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned)</returns>
+        /// <param name="section">The subsection(s).</param>
+        /// <param name="name">The name of the setting.</param>
+        /// <param name="value">The default value.</param>
+        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned).</returns>
         public bool GetValue(string section, string name, ref double value)
         {
             string data = value.ToString("R", Culture);
@@ -643,12 +650,12 @@ namespace Cave
         }
 
         /// <summary>
-        /// Directly obtains a value from the specified subsection(s) with the specified name
+        /// Directly obtains a value from the specified subsection(s) with the specified name.
         /// </summary>
-        /// <param name="section">The subsection(s)</param>
-        /// <param name="name">The name of the setting</param>
-        /// <param name="value">The default value</param>
-        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned)</returns>
+        /// <param name="section">The subsection(s).</param>
+        /// <param name="name">The name of the setting.</param>
+        /// <param name="value">The default value.</param>
+        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned).</returns>
         public bool GetValue(string section, string name, ref decimal value)
         {
             string data = value.ToString(Culture);
@@ -666,12 +673,12 @@ namespace Cave
         }
 
         /// <summary>
-        /// Directly obtains a value from the specified subsection(s) with the specified name
+        /// Directly obtains a value from the specified subsection(s) with the specified name.
         /// </summary>
-        /// <param name="section">The subsection(s)</param>
-        /// <param name="name">The name of the setting</param>
-        /// <param name="value">The default value</param>
-        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned)</returns>
+        /// <param name="section">The subsection(s).</param>
+        /// <param name="name">The name of the setting.</param>
+        /// <param name="value">The default value.</param>
+        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned).</returns>
         public bool GetValue(string section, string name, ref DateTime value)
         {
             string data = value.ToString(Culture);
@@ -689,12 +696,12 @@ namespace Cave
         }
 
         /// <summary>
-        /// Directly obtains a value from the specified subsection(s) with the specified name
+        /// Directly obtains a value from the specified subsection(s) with the specified name.
         /// </summary>
-        /// <param name="section">The subsection(s)</param>
-        /// <param name="name">The name of the setting</param>
-        /// <param name="value">The default value</param>
-        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned)</returns>
+        /// <param name="section">The subsection(s).</param>
+        /// <param name="name">The name of the setting.</param>
+        /// <param name="value">The default value.</param>
+        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned).</returns>
         public bool GetValue(string section, string name, ref TimeSpan value)
         {
             string data = value.ToString();
@@ -712,14 +719,15 @@ namespace Cave
         }
 
         /// <summary>
-        /// Directly obtains a (enum) value from the specified subsection(s) with the specified name
+        /// Directly obtains a (enum) value from the specified subsection(s) with the specified name.
         /// </summary>
-        /// <typeparam name="T">Type of the enum</typeparam>
-        /// <param name="section">The subsection(s)</param>
-        /// <param name="name">The name of the setting</param>
-        /// <param name="value">The default value</param>
-        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned)</returns>
-        public bool GetEnum<T>(string section, string name, ref T value) where T : struct, IConvertible
+        /// <typeparam name="T">Type of the enum.</typeparam>
+        /// <param name="section">The subsection(s).</param>
+        /// <param name="name">The name of the setting.</param>
+        /// <param name="value">The default value.</param>
+        /// <returns>Returns true if the setting exist and the read value was returned, true otherwise (default value returned).</returns>
+        public bool GetEnum<T>(string section, string name, ref T value)
+            where T : struct, IConvertible
         {
             string data = value.ToString();
             if (!GetValue(section, name, ref data))

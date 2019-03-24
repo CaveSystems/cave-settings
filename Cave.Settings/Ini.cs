@@ -13,7 +13,7 @@ using Cave.Compression;
 namespace Cave
 {
     /// <summary>
-    /// Provides access to an ini file
+    /// Provides access to an ini file.
     /// </summary>
     /// <seealso cref="SettingsReader" />
     public class Ini : SettingsReader
@@ -92,7 +92,7 @@ namespace Cave
         }
 
         /// <summary>
-        /// Obtains the platform specific extension of the configuration file
+        /// Obtains the platform specific extension of the configuration file.
         /// </summary>
         public static string PlatformExtension
         {
@@ -112,10 +112,10 @@ namespace Cave
             }
         }
 
-        /// <summary>Checks whether the config can be reloaded</summary>
+        /// <summary>Checks whether the config can be reloaded.</summary>
         public override bool CanReload => true;
 
-        /// <summary>Gets the culture used to decode values</summary>
+        /// <summary>Gets the culture used to decode values.</summary>
         public override CultureInfo Culture => Properties.Culture;
 
         /// <summary>Gets the properties.</summary>
@@ -154,38 +154,38 @@ namespace Cave
         /// <summary>Initializes a new instance of the <see cref="Ini" /> class.</summary>
         /// <param name="fileName">Name of the file.</param>
         /// <param name="properties">The properties.</param>
-        public Ini(string fileName, IniProperties properties = default(IniProperties)) : this(IniReader.FromFile(fileName, properties))
+        public Ini(string fileName, IniProperties properties = default) : this(IniReader.FromFile(fileName, properties))
         {
         }
 
-        /// <summary>Reload the whole config</summary>
+        /// <summary>Reload the whole config.</summary>
         public override void Reload()
         {
             Load(IniReader.FromFile(Name));
         }
 
-        /// <summary>Obtains all section names present at the file</summary>
-        /// <returns>Returns an array of all section names</returns>
+        /// <summary>Obtains all section names present at the file.</summary>
+        /// <returns>Returns an array of all section names.</returns>
         public override string[] GetSectionNames()
         {
             return m_Sections.Select(s => s.Name).ToArray();
         }
 
-        /// <summary>Obtains whether a specified section exists or not</summary>
-        /// <param name="section">Section to search</param>
-        /// <returns>Returns true if the sections exists false otherwise</returns>
+        /// <summary>Obtains whether a specified section exists or not.</summary>
+        /// <param name="section">Section to search.</param>
+        /// <returns>Returns true if the sections exists false otherwise.</returns>
         public override bool HasSection(string section)
         {
             return GetSection(section) != null;
         }
 
-        /// <summary>Reads a whole section from the settings</summary>
-        /// <param name="sectionName">Name of the section</param>
-        /// <param name="remove">Remove comments and empty lines</param>
-        /// <returns>Returns the whole section as string array</returns>
+        /// <summary>Reads a whole section from the settings.</summary>
+        /// <param name="sectionName">Name of the section.</param>
+        /// <param name="remove">Remove comments and empty lines.</param>
+        /// <returns>Returns the whole section as string array.</returns>
         public override string[] ReadSection(string sectionName, bool remove)
         {
-            List<string> result = new List<string>();
+            var result = new List<string>();
             Section section = GetSection(sectionName);
             if (section != null)
             {
@@ -210,10 +210,10 @@ namespace Cave
             return result.ToArray();
         }
 
-        /// <summary>Reads a setting from the settings</summary>
-        /// <param name="sectionName">Sectionname of the setting</param>
-        /// <param name="name">Name of the setting</param>
-        /// <returns>Returns null if the setting is not present a string otherwise</returns>
+        /// <summary>Reads a setting from the settings.</summary>
+        /// <param name="sectionName">Sectionname of the setting.</param>
+        /// <param name="name">Name of the setting.</param>
+        /// <returns>Returns null if the setting is not present a string otherwise.</returns>
         public override string ReadSetting(string sectionName, string name)
         {
             Section section = GetSection(sectionName);
@@ -246,8 +246,8 @@ namespace Cave
             m_Sections.Clear();
         }
 
-        /// <summary>Removes a whole section from the ini file</summary>
-        /// <param name="sectionName">Name of the section</param>
+        /// <summary>Removes a whole section from the ini file.</summary>
+        /// <param name="sectionName">Name of the section.</param>
         public void RemoveSection(string sectionName)
         {
             Section section = GetSection(sectionName);
@@ -255,9 +255,9 @@ namespace Cave
         }
 
         /// <summary>
-        /// Writes (replaces) a whole section at the ini
+        /// Writes (replaces) a whole section at the ini.
         /// </summary>
-        /// <param name="sectionName">Name of the section</param>
+        /// <param name="sectionName">Name of the section.</param>
         /// <param name="value">The value.</param>
         public void WriteSection(string sectionName, string value)
         {
@@ -265,10 +265,10 @@ namespace Cave
         }
 
         /// <summary>
-        /// Writes (replaces) a whole section at the ini
+        /// Writes (replaces) a whole section at the ini.
         /// </summary>
-        /// <param name="sectionName">Name of the section</param>
-        /// <param name="values">The values</param>
+        /// <param name="sectionName">Name of the section.</param>
+        /// <param name="values">The values.</param>
         /// <returns></returns>
         public void WriteSection(string sectionName, IEnumerable values)
         {
@@ -282,7 +282,7 @@ namespace Cave
                 throw new ArgumentNullException("values");
             }
 
-            List<string> strings = new List<string>();
+            var strings = new List<string>();
             foreach (object value in values)
             {
                 strings.Add(StringExtensions.ToString(value, Culture));
@@ -291,10 +291,10 @@ namespace Cave
         }
 
         /// <summary>
-        /// Writes (replaces) a whole section at the ini
+        /// Writes (replaces) a whole section at the ini.
         /// </summary>
-        /// <param name="sectionName">Name of the section</param>
-        /// <param name="lines">The lines</param>
+        /// <param name="sectionName">Name of the section.</param>
+        /// <param name="lines">The lines.</param>
         /// <returns></returns>
         public void WriteSection(string sectionName, IEnumerable<string> lines)
         {
@@ -308,7 +308,7 @@ namespace Cave
                 throw new ArgumentNullException("lines");
             }
 
-            Section newSection = new Section() { Name = sectionName };
+            var newSection = new Section() { Name = sectionName };
             foreach (string line in lines)
             {
                 int i = line.IndexOf('=');
@@ -324,26 +324,27 @@ namespace Cave
             Section section = GetSection(sectionName);
             if (section != null)
             {
-                //replace
+                // replace
                 int i = m_Sections.IndexOf(section);
                 m_Sections[i] = newSection;
             }
             else
             {
-                //add
+                // add
                 m_Sections.Add(newSection);
             }
         }
 
         /// <summary>
-        /// Writes all fields of the struct to the specified section (replacing a present one) 
+        /// Writes all fields of the struct to the specified section (replacing a present one).
         /// </summary>
-        /// <typeparam name="T">The struct type</typeparam>
-        /// <param name="sectionName">The section to write to</param>
-        /// <param name="item">The struct</param>
-        public void WriteStruct<T>(string sectionName, T item) where T : struct
+        /// <typeparam name="T">The struct type.</typeparam>
+        /// <param name="sectionName">The section to write to.</param>
+        /// <param name="item">The struct.</param>
+        public void WriteStruct<T>(string sectionName, T item)
+            where T : struct
         {
-            List<string> newSection = new List<string>();
+            var newSection = new List<string>();
             foreach (FieldInfo field in item.GetType().GetFields())
             {
                 string value = StringExtensions.ToString(field.GetValue(item), Culture);
@@ -353,19 +354,20 @@ namespace Cave
         }
 
         /// <summary>
-        /// Writes all fields of the object to the specified section (replacing a present one) 
+        /// Writes all fields of the object to the specified section (replacing a present one).
         /// </summary>
-        /// <typeparam name="T">The class type</typeparam>
-        /// <param name="sectionName">The section to write to</param>
-        /// <param name="obj">The object</param>
-        public void WriteObject<T>(string sectionName, T obj) where T : class
+        /// <typeparam name="T">The class type.</typeparam>
+        /// <param name="sectionName">The section to write to.</param>
+        /// <param name="obj">The object.</param>
+        public void WriteObject<T>(string sectionName, T obj)
+            where T : class
         {
             if (obj == null)
             {
                 throw new ArgumentNullException("obj");
             }
 
-            List<string> newSection = new List<string>();
+            var newSection = new List<string>();
             foreach (FieldInfo field in obj.GetType().GetFields())
             {
                 string value = StringExtensions.ToString(field.GetValue(obj), Culture);
@@ -375,22 +377,22 @@ namespace Cave
         }
 
         /// <summary>
-        /// Writes a setting to the ini file (replacing a present one) 
+        /// Writes a setting to the ini file (replacing a present one).
         /// </summary>
-        /// <param name="section">Name of the section</param>
-        /// <param name="name">Name of the setting</param>
-        /// <param name="value">Value of the setting</param>
+        /// <param name="section">Name of the section.</param>
+        /// <param name="name">Name of the setting.</param>
+        /// <param name="value">Value of the setting.</param>
         public void WriteSetting(string section, string name, object value)
         {
             WriteSetting(section, name, StringExtensions.ToString(value, Culture));
         }
 
         /// <summary>
-        /// Writes a setting to the ini file (replacing a present one) 
+        /// Writes a setting to the ini file (replacing a present one).
         /// </summary>
-        /// <param name="sectionName">Name of the section</param>
-        /// <param name="name">Name of the setting</param>
-        /// <param name="value">Value of the setting</param>
+        /// <param name="sectionName">Name of the section.</param>
+        /// <param name="name">Name of the setting.</param>
+        /// <param name="value">Value of the setting.</param>
         public void WriteSetting(string sectionName, string name, string value)
         {
             if (sectionName == null)
@@ -424,7 +426,7 @@ namespace Cave
         }
 
         /// <summary>
-        /// Saves the content of the ini to a file readable by <see cref="IniReader"/>
+        /// Saves the content of the ini to a file readable by <see cref="IniReader"/>.
         /// </summary>
         public void Save()
         {
@@ -449,7 +451,7 @@ namespace Cave
                     default: throw new InvalidDataException(string.Format("Unknown Compression {0}", Properties.Compression));
                 }
 
-                StreamWriter writer = new StreamWriter(stream, Properties.Encoding);
+                var writer = new StreamWriter(stream, Properties.Encoding);
                 foreach (Section section in m_Sections)
                 {
                     writer.WriteLine("[" + section.Name + "]");

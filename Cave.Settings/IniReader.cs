@@ -17,42 +17,42 @@ namespace Cave
     public class IniReader : SettingsReader
     {
         #region static constructors
-        /// <summary>Parses initialization data</summary>
+
+        /// <summary>Parses initialization data.</summary>
         /// <param name="name">The (file)name.</param>
         /// <param name="data">Content to parse.</param>
         /// <param name="properties">The data properties.</param>
         /// <returns></returns>
-        public static IniReader Parse(string name, string data, IniProperties properties = default(IniProperties))
+        public static IniReader Parse(string name, string data, IniProperties properties = default)
         {
             return new IniReader(name, data.SplitNewLine(), properties);
         }
 
-        /// <summary>Parses initialization data</summary>
+        /// <summary>Parses initialization data.</summary>
         /// <param name="name">The name.</param>
         /// <param name="data">Content to parse.</param>
         /// <param name="properties">The data properties.</param>
         /// <returns></returns>
-        public static IniReader Parse(string name, byte[] data, IniProperties properties = default(IniProperties))
+        public static IniReader Parse(string name, byte[] data, IniProperties properties = default)
         {
             return Parse(name, Encoding.UTF8.GetString(data), properties);
         }
 
-        /// <summary>Loads initialization data from strings</summary>
+        /// <summary>Loads initialization data from strings.</summary>
         /// <param name="name">The name.</param>
         /// <param name="lines">Content to parse.</param>
         /// <param name="properties">The content properties.</param>
         /// <returns></returns>
-        public static IniReader Parse(string name, string[] lines, IniProperties properties = default(IniProperties))
+        public static IniReader Parse(string name, string[] lines, IniProperties properties = default)
         {
             return new IniReader(name, lines, properties);
         }
 
-
-        /// <summary>Loads initialization data from file</summary>
-        /// <param name="fileName">File name to read</param>
+        /// <summary>Loads initialization data from file.</summary>
+        /// <param name="fileName">File name to read.</param>
         /// <param name="properties">The content properties.</param>
         /// <returns></returns>
-        public static IniReader FromFile(string fileName, IniProperties properties = default(IniProperties))
+        public static IniReader FromFile(string fileName, IniProperties properties = default)
         {
             if (File.Exists(fileName))
             {
@@ -61,25 +61,25 @@ namespace Cave
             return new IniReader(fileName, new string[0], properties);
         }
 
-        /// <summary>Loads initialization data from stream</summary>
+        /// <summary>Loads initialization data from stream.</summary>
         /// <param name="name">The name.</param>
-        /// <param name="stream">The stream to read</param>
-        /// <param name="count">Number of bytes to read</param>
+        /// <param name="stream">The stream to read.</param>
+        /// <param name="count">Number of bytes to read.</param>
         /// <param name="properties">The content properties.</param>
         /// <returns></returns>
-        public static IniReader FromStream(string name, Stream stream, int count, IniProperties properties = default(IniProperties))
+        public static IniReader FromStream(string name, Stream stream, int count, IniProperties properties = default)
         {
             byte[] data = stream.ReadBlock(count);
             return Parse(name, data, properties);
         }
 
         /// <summary>
-        /// Obtains the configuration file for the current running process using the specified <see cref="FileLocation" />
+        /// Obtains the configuration file for the current running process using the specified <see cref="FileLocation" />.
         /// </summary>
         /// <param name="fileLocation">The file location.</param>
         /// <param name="properties">The content properties.</param>
         /// <returns></returns>
-        public static IniReader FromLocation(FileLocation fileLocation, IniProperties properties = default(IniProperties))
+        public static IniReader FromLocation(FileLocation fileLocation, IniProperties properties = default)
         {
             if (fileLocation == null)
             {
@@ -91,25 +91,25 @@ namespace Cave
         }
 
         /// <summary>
-        /// Obtains the configuration file for the current running process using the specified <see cref="RootLocation" />
+        /// Obtains the configuration file for the current running process using the specified <see cref="RootLocation" />.
         /// </summary>
         /// <param name="root">The root location.</param>
         /// <param name="properties">The content properties.</param>
         /// <returns></returns>
-        public static IniReader FromLocation(RootLocation root, IniProperties properties = default(IniProperties))
+        public static IniReader FromLocation(RootLocation root, IniProperties properties = default)
         {
-            FileLocation fileLocation = new FileLocation(root: root, extension: Ini.PlatformExtension);
+            var fileLocation = new FileLocation(root: root, extension: Ini.PlatformExtension);
             return FromLocation(fileLocation, properties);
         }
         #endregion
 
         /// <summary>
-        /// Holds all lines of the configuration
+        /// Holds all lines of the configuration.
         /// </summary>
         string[] m_Lines;
 
         /// <summary>
-        /// Checks whether the config can be reloaded
+        /// Checks whether the config can be reloaded.
         /// </summary>
         public override bool CanReload
         {
@@ -131,10 +131,10 @@ namespace Cave
         }
 
         /// <summary>
-        /// Obtains the index (linenumber) the specified section starts
+        /// Obtains the index (linenumber) the specified section starts.
         /// </summary>
-        /// <param name="section">Section to search</param>
-        /// <returns>Returns the index the section starts at</returns>
+        /// <param name="section">Section to search.</param>
+        /// <returns>Returns the index the section starts at.</returns>
         int SectionStart(string section)
         {
             if (section == null)
@@ -187,7 +187,7 @@ namespace Cave
                     case CompressionType.None: break;
                     default: throw new InvalidDataException(string.Format("Unknown Compression {0}", Properties.Compression));
                 }
-                StreamReader reader = new StreamReader(stream, Properties.Encoding);
+                var reader = new StreamReader(stream, Properties.Encoding);
                 string[] result = reader.ReadToEnd().SplitNewLine();
                 reader.Close();
                 return result;
@@ -200,27 +200,27 @@ namespace Cave
         }
 
         /// <summary>
-        /// Provides access to the IniProperties 
+        /// Provides access to the IniProperties.
         /// </summary>
         public IniProperties Properties { get; set; }
 
         /// <summary>
-        /// Gets the culture used to decode values
+        /// Gets the culture used to decode values.
         /// </summary>
         public override CultureInfo Culture => Properties.Culture;
 
-        /// <summary>Loads initialization data</summary>
+        /// <summary>Loads initialization data.</summary>
         /// <param name="name">The (file)name.</param>
         /// <param name="lines">The lines.</param>
-        /// <param name="properties">Properties of the initialization data</param>
-        IniReader(string name, string[] lines, IniProperties properties = default(IniProperties)) : base(name)
+        /// <param name="properties">Properties of the initialization data.</param>
+        IniReader(string name, string[] lines, IniProperties properties = default) : base(name)
         {
             Properties = properties.Valid ? properties : IniProperties.Default;
             m_Lines = lines;
         }
 
         /// <summary>
-        /// Reload the whole config
+        /// Reload the whole config.
         /// </summary>
         public override void Reload()
         {
@@ -233,22 +233,22 @@ namespace Cave
         }
 
         /// <summary>
-        /// Obtains whether a specified section exists or not
+        /// Obtains whether a specified section exists or not.
         /// </summary>
-        /// <param name="section">Section to search</param>
-        /// <returns>Returns true if the sections exists false otherwise</returns>
+        /// <param name="section">Section to search.</param>
+        /// <returns>Returns true if the sections exists false otherwise.</returns>
         public override bool HasSection(string section)
         {
             return SectionStart(section) > -1;
         }
 
         /// <summary>
-        /// Obtains all section names present at the file
+        /// Obtains all section names present at the file.
         /// </summary>
-        /// <returns>Returns an array of all section names</returns>
+        /// <returns>Returns an array of all section names.</returns>
         public override string[] GetSectionNames()
         {
-            List<string> result = new List<string>();
+            var result = new List<string>();
             foreach (string line in m_Lines)
             {
                 string trimed = line.Trim();
@@ -261,14 +261,14 @@ namespace Cave
         }
 
         /// <summary>
-        /// Reads a whole section from the ini
+        /// Reads a whole section from the ini.
         /// </summary>
-        /// <param name="section">Name of the section</param>
-        /// <param name="remove">Remove comments and empty lines</param>
-        /// <returns>Returns the whole section as string array</returns>
+        /// <param name="section">Name of the section.</param>
+        /// <param name="remove">Remove comments and empty lines.</param>
+        /// <returns>Returns the whole section as string array.</returns>
         public override string[] ReadSection(string section, bool remove)
         {
-            //find section
+            // find section
             int i;
             if (section == null)
             {
@@ -279,12 +279,13 @@ namespace Cave
                 i = SectionStart(section);
                 if (i < 0)
                 {
-                    //empty or not present
+                    // empty or not present
                     return new string[0];
                 }
             }
-            //got it, add lines to result
-            List<string> result = new List<string>();
+
+            // got it, add lines to result
+            var result = new List<string>();
             for (; ++i < m_Lines.Length;)
             {
                 string line = m_Lines[i];
@@ -295,11 +296,11 @@ namespace Cave
 
                 if (remove)
                 {
-                    //remove comments and empty lines
+                    // remove comments and empty lines
                     int comment = line.IndexOfAny(new char[] { '#', ';' });
                     if (comment > -1)
                     {
-                        //only remove if comment marker is the first character
+                        // only remove if comment marker is the first character
                         string whiteSpace = line.Substring(0, comment);
                         if (string.IsNullOrEmpty(whiteSpace) || (whiteSpace.Trim().Length == 0))
                         {
@@ -317,20 +318,21 @@ namespace Cave
         }
 
         /// <summary>
-        /// Reads a setting from the ini
+        /// Reads a setting from the ini.
         /// </summary>
-        /// <param name="section">Sectionname of the setting</param>
-        /// <param name="settingName">Name of the setting</param>
-        /// <returns>Returns null if the setting is not present a string otherwise</returns>
+        /// <param name="section">Sectionname of the setting.</param>
+        /// <param name="settingName">Name of the setting.</param>
+        /// <returns>Returns null if the setting is not present a string otherwise.</returns>
         public override string ReadSetting(string section, string settingName)
         {
-            //find section
+            // find section
             int i = SectionStart(section);
             if (i < 0)
             {
                 return null;
             }
-            //iterate all lines
+
+            // iterate all lines
             for (++i; i < m_Lines.Length; i++)
             {
                 string line = m_Lines[i].Trim();
@@ -338,7 +340,8 @@ namespace Cave
                 {
                     break;
                 }
-                //ignore comments
+
+                // ignore comments
                 if (line.StartsWith("#"))
                 {
                     continue;
@@ -348,11 +351,12 @@ namespace Cave
                 {
                     continue;
                 }
-                //find equal sign
+
+                // find equal sign
                 int sign = line.IndexOf('=');
                 if (sign > -1)
                 {
-                    //got a setting, check name
+                    // got a setting, check name
                     string name = line.Substring(0, sign).Trim();
                     if (string.Compare(settingName, name, !Properties.CaseSensitive, Properties.Culture) == 0)
                     {
@@ -376,18 +380,19 @@ namespace Cave
                     }
                 }
             }
-            //no setting with the specified name found
+
+            // no setting with the specified name found
             return null;
         }
 
         /// <summary>
-        /// Obtains a string array with the whole configuration
+        /// Obtains a string array with the whole configuration.
         /// </summary>
-        /// <returns>Returns an array containing all strings (lines) of the configuration</returns>
+        /// <returns>Returns an array containing all strings (lines) of the configuration.</returns>
         public string[] ToArray() { return (string[])m_Lines.Clone(); }
 
         /// <summary>
-        /// Retrieves the whole data as string
+        /// Retrieves the whole data as string.
         /// </summary>
         /// <returns></returns>
         public override string ToString()

@@ -18,67 +18,63 @@ namespace Cave
     public class IniWriter
     {
         #region static constructors
-        /// <summary>Creates an new initialization writer by parsing the specified data</summary>
+
+        /// <summary>Creates an new initialization writer by parsing the specified data.</summary>
         /// <param name="name">The (file)name.</param>
         /// <param name="data">Content to parse.</param>
         /// <param name="properties">The data properties.</param>
-        /// <returns></returns>
-        public static IniWriter Parse(string name, string data, IniProperties properties = default(IniProperties))
+        /// <returns>Returns a new <see cref="IniWriter"/> instance.</returns>
+        public static IniWriter Parse(string name, string data, IniProperties properties = default)
         {
             return new IniWriter(IniReader.Parse(name, data, properties));
         }
 
-        /// <summary>Creates an new initialization writer by parsing the specified data</summary>
+        /// <summary>Creates an new initialization writer by parsing the specified data.</summary>
         /// <param name="name">The name.</param>
         /// <param name="data">Content to parse.</param>
         /// <param name="properties">The data properties.</param>
-        /// <returns></returns>
-        public static IniWriter Parse(string name, byte[] data, IniProperties properties = default(IniProperties))
+        /// <returns>Returns a new <see cref="IniWriter"/> instance.</returns>
+        public static IniWriter Parse(string name, byte[] data, IniProperties properties = default)
         {
             return Parse(name, Encoding.UTF8.GetString(data), properties);
         }
 
-        /// <summary>Creates an new initialization writer by parsing the specified data</summary>
+        /// <summary>Creates an new initialization writer by parsing the specified data.</summary>
         /// <param name="name">The name.</param>
         /// <param name="lines">Content to parse.</param>
         /// <param name="properties">The content properties.</param>
-        /// <returns></returns>
-        public static IniWriter Parse(string name, string[] lines, IniProperties properties = default(IniProperties))
+        /// <returns>Returns a new <see cref="IniWriter"/> instance.</returns>
+        public static IniWriter Parse(string name, string[] lines, IniProperties properties = default)
         {
             return new IniWriter(IniReader.Parse(name, lines, properties));
         }
 
-
-        /// <summary>Creates an new initialization writer with the specified preexisting content</summary>
-        /// <param name="fileName">File name to read</param>
+        /// <summary>Creates an new initialization writer with the specified preexisting content.</summary>
+        /// <param name="fileName">File name to read.</param>
         /// <param name="properties">The content properties.</param>
-        /// <returns></returns>
-        public static IniWriter FromFile(string fileName, IniProperties properties = default(IniProperties))
+        /// <returns>Returns a new <see cref="IniWriter"/> instance.</returns>
+        public static IniWriter FromFile(string fileName, IniProperties properties = default)
         {
-            if (File.Exists(fileName))
-            {
-                return Parse(fileName, File.ReadAllBytes(fileName), properties);
-            }
-            return new IniWriter(fileName, properties);
+            return File.Exists(fileName) ? Parse(fileName, File.ReadAllBytes(fileName), properties) : new IniWriter(fileName, properties);
         }
 
-        /// <summary>Creates an new initialization writer with the specified preexisting content</summary>
+        /// <summary>Creates an new initialization writer with the specified preexisting content.</summary>
         /// <param name="name">The name.</param>
-        /// <param name="stream">The stream to read</param>
-        /// <param name="count">Number of bytes to read</param>
+        /// <param name="stream">The stream to read.</param>
+        /// <param name="count">Number of bytes to read.</param>
         /// <param name="properties">The content properties.</param>
-        /// <returns></returns>
-        public static IniWriter FromStream(string name, Stream stream, int count, IniProperties properties = default(IniProperties))
+        /// <returns>Returns a new <see cref="IniWriter"/> instance.</returns>
+        public static IniWriter FromStream(string name, Stream stream, int count, IniProperties properties = default)
         {
             byte[] data = stream.ReadBlock(count);
             return Parse(name, data, properties);
         }
 
-        /// <summary>Obtains the configuration file writer using the specified <see cref="FileLocation" /></summary>
+        /// <summary>Obtains the configuration file writer using the specified <see cref="FileLocation" />.</summary>
         /// <param name="fileLocation">The file location.</param>
         /// <param name="properties">The content properties.</param>
-        /// <returns></returns>
-        public static IniWriter FromLocation(FileLocation fileLocation, IniProperties properties = default(IniProperties))
+        /// <returns>Returns a new <see cref="IniWriter"/> instance.</returns>
+        public static IniWriter FromLocation(FileLocation fileLocation, IniProperties properties = default)
         {
             if (fileLocation == null)
             {
@@ -89,39 +85,29 @@ namespace Cave
             return FromFile(fileName, properties);
         }
 
-        /// <summary>Obtains the configuration file writer using the specified <see cref="RootLocation" /></summary>
+        /// <summary>Obtains the configuration file writer using the specified <see cref="RootLocation" />.</summary>
         /// <param name="root">The root location.</param>
         /// <param name="properties">The content properties.</param>
-        /// <returns></returns>
-        public static IniWriter FromLocation(RootLocation root, IniProperties properties = default(IniProperties))
+        /// <returns>Returns a new <see cref="IniWriter"/> instance.</returns>
+        public static IniWriter FromLocation(RootLocation root, IniProperties properties = default)
         {
-            FileLocation fileLocation = new FileLocation(root: root, extension: Ini.PlatformExtension);
+            var fileLocation = new FileLocation(root: root, extension: Ini.PlatformExtension);
             return FromLocation(fileLocation, properties);
         }
 
         #endregion
 
-        Dictionary<string, List<string>> m_Data = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        readonly Dictionary<string, List<string>> data = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Provides access to the IniProperties 
+        /// Gets or sets the IniProperties.
         /// </summary>
         public IniProperties Properties { get; set; }
 
         /// <summary>
-        /// Name of the ini writer
+        /// Gets or sets name of the ini writer.
         /// </summary>
         public string Name { get; set; }
-
-        /// <summary>
-        /// Creates a new empty writer instance
-        /// </summary>
-        public IniWriter(IniReader reader)
-        {
-            Properties = reader.Properties;
-            Name = reader.Name;
-            Load(reader);
-        }
 
         /// <summary>Initializes a new instance of the <see cref="IniWriter"/> class.</summary>
         public IniWriter()
@@ -130,8 +116,10 @@ namespace Cave
         }
 
         /// <summary>
-        /// Creates a new empty writer instance
+        /// Initializes a new instance of the <see cref="IniWriter"/> class.
         /// </summary>
+        /// <param name="fileName">Name of the file to write to.</param>
+        /// <param name="properties">Encoding properties.</param>
         public IniWriter(string fileName, IniProperties properties)
         {
             Properties = properties.Valid ? properties : IniProperties.Default;
@@ -147,8 +135,9 @@ namespace Cave
         }
 
         /// <summary>
-        /// Creates a new writer instance using data from specified reader
+        /// Initializes a new instance of the <see cref="IniWriter"/> class.
         /// </summary>
+        /// <param name="reader">Settings to initialize the writer from.</param>
         public IniWriter(ISettings reader)
         {
             if (reader == null)
@@ -173,9 +162,9 @@ namespace Cave
         }
 
         /// <summary>
-        /// Loads all settings from the specified reader and replaces all present sections
+        /// Loads all settings from the specified reader and replaces all present sections.
         /// </summary>
-        /// <param name="reader">The reader to obtain the config from</param>
+        /// <param name="reader">The reader to obtain the config from.</param>
         public void Load(ISettings reader)
         {
             if (reader == null)
@@ -185,19 +174,19 @@ namespace Cave
 
             foreach (string section in reader.GetSectionNames())
             {
-                m_Data[section] = new List<string>(reader.ReadSection(section, false));
+                data[section] = new List<string>(reader.ReadSection(section, false));
             }
         }
 
         /// <summary>
-        /// Removes a whole section from the ini file
+        /// Removes a whole section from the ini file.
         /// </summary>
-        /// <param name="section">Name of the section</param>
+        /// <param name="section">Name of the section.</param>
         public void RemoveSection(string section)
         {
-            if (m_Data.ContainsKey(section))
+            if (data.ContainsKey(section))
             {
-                if (!m_Data.Remove(section))
+                if (!data.Remove(section))
                 {
                     throw new KeyNotFoundException();
                 }
@@ -205,9 +194,9 @@ namespace Cave
         }
 
         /// <summary>
-        /// Writes (replaces) a whole section at the ini
+        /// Writes (replaces) a whole section at the ini.
         /// </summary>
-        /// <param name="section">Name of the section</param>
+        /// <param name="section">Name of the section.</param>
         /// <param name="value">The value.</param>
         public void WriteSection(string section, string value)
         {
@@ -215,11 +204,10 @@ namespace Cave
         }
 
         /// <summary>
-        /// Writes (replaces) a whole section at the ini
+        /// Writes (replaces) a whole section at the ini.
         /// </summary>
-        /// <param name="section">Name of the section</param>
-        /// <param name="values">The values</param>
-        /// <returns></returns>
+        /// <param name="section">Name of the section.</param>
+        /// <param name="values">The values.</param>
         public void WriteSection(string section, IEnumerable values)
         {
             if (section == null)
@@ -232,7 +220,7 @@ namespace Cave
                 throw new ArgumentNullException("values");
             }
 
-            List<string> strings = new List<string>();
+            var strings = new List<string>();
             foreach (object value in values)
             {
                 strings.Add(value.ToString());
@@ -241,11 +229,10 @@ namespace Cave
         }
 
         /// <summary>
-        /// Writes (replaces) a whole section at the ini
+        /// Writes (replaces) a whole section at the ini.
         /// </summary>
-        /// <param name="section">Name of the section</param>
-        /// <param name="lines">The lines</param>
-        /// <returns></returns>
+        /// <param name="section">Name of the section.</param>
+        /// <param name="lines">The lines.</param>
         public void WriteSection(string section, IEnumerable<string> lines)
         {
             if (section == null)
@@ -258,40 +245,42 @@ namespace Cave
                 throw new ArgumentNullException("lines");
             }
 
-            List<string> result = new List<string>();
+            var result = new List<string>();
             result.AddRange(lines);
-            m_Data[section] = result;
+            data[section] = result;
         }
 
         /// <summary>
-        /// Writes all fields of the struct to the specified section (replacing a present one) 
+        /// Writes all fields of the struct to the specified section (replacing a present one).
         /// </summary>
-        /// <typeparam name="T">The struct type</typeparam>
-        /// <param name="section">The section to write to</param>
-        /// <param name="item">The struct</param>
-        public void WriteStruct<T>(string section, T item) where T : struct
+        /// <typeparam name="T">The struct type.</typeparam>
+        /// <param name="section">The section to write to.</param>
+        /// <param name="item">The struct.</param>
+        public void WriteStruct<T>(string section, T item)
+            where T : struct
         {
             if (section == null)
             {
                 throw new ArgumentNullException("section");
             }
 
-            List<string> lines = new List<string>();
+            var lines = new List<string>();
             foreach (FieldInfo field in item.GetType().GetFields())
             {
                 string value = StringExtensions.ToString(field.GetValue(item), Properties.Culture);
                 lines.Add(field.Name + "=" + value);
             }
-            m_Data[section] = lines;
+            data[section] = lines;
         }
 
         /// <summary>
-        /// Writes all fields of the object to the specified section (replacing a present one) 
+        /// Writes all fields of the object to the specified section (replacing a present one).
         /// </summary>
-        /// <typeparam name="T">The class type</typeparam>
-        /// <param name="section">The section to write to</param>
-        /// <param name="obj">The object</param>
-        public void WriteObject<T>(string section, T obj) where T : class
+        /// <typeparam name="T">The class type.</typeparam>
+        /// <param name="section">The section to write to.</param>
+        /// <param name="obj">The object.</param>
+        public void WriteObject<T>(string section, T obj)
+            where T : class
         {
             if (section == null)
             {
@@ -303,32 +292,32 @@ namespace Cave
                 throw new ArgumentNullException("obj");
             }
 
-            List<string> sections = new List<string>();
+            var sections = new List<string>();
             foreach (FieldInfo field in obj.GetType().GetFields())
             {
                 string value = StringExtensions.ToString(field.GetValue(obj), Properties.Culture);
                 sections.Add(field.Name + "=" + value);
             }
-            m_Data[section] = sections;
+            data[section] = sections;
         }
 
         /// <summary>
-        /// Writes a setting to the ini file (replacing a present one) 
+        /// Writes a setting to the ini file (replacing a present one).
         /// </summary>
-        /// <param name="section">Name of the section</param>
-        /// <param name="name">Name of the setting</param>
-        /// <param name="value">Value of the setting</param>
+        /// <param name="section">Name of the section.</param>
+        /// <param name="name">Name of the setting.</param>
+        /// <param name="value">Value of the setting.</param>
         public void WriteSetting(string section, string name, object value)
         {
             WriteSetting(section, name, StringExtensions.ToString(value, Properties.Culture));
         }
 
         /// <summary>
-        /// Writes a setting to the ini tile (replacing a present one) 
+        /// Writes a setting to the ini tile (replacing a present one).
         /// </summary>
-        /// <param name="section">Name of the section</param>
-        /// <param name="name">Name of the setting</param>
-        /// <param name="value">Value of the setting</param>
+        /// <param name="section">Name of the section.</param>
+        /// <param name="name">Name of the setting.</param>
+        /// <param name="value">Value of the setting.</param>
         public void WriteSetting(string section, string name, string value)
         {
             if (section == null)
@@ -352,16 +341,17 @@ namespace Cave
             }
 
             List<string> result;
-            if (m_Data.ContainsKey(section))
+            if (data.ContainsKey(section))
             {
-                result = m_Data[section];
+                result = data[section];
             }
             else
             {
                 result = new List<string>();
-                m_Data[section] = result;
+                data[section] = result;
             }
-            //try to replace first
+
+            // try to replace first
             for (int i = 0; i < result.Count; i++)
             {
                 string setting = result[i].BeforeFirst('=').Trim();
@@ -371,14 +361,15 @@ namespace Cave
                     return;
                 }
             }
-            //add new one
+
+            // add new one
             result.Add(name + "=" + value);
         }
 
         /// <summary>
-        /// Saves the content of the ini to a file readable by <see cref="IniReader"/>
+        /// Saves the content of the ini to a file readable by <see cref="IniReader"/>.
         /// </summary>
-        /// <param name="fileName">The fileName to write to</param>
+        /// <param name="fileName">The fileName to write to.</param>
         public void Save(string fileName = null)
         {
             if (fileName == null)
@@ -406,12 +397,12 @@ namespace Cave
                     default: throw new InvalidDataException(string.Format("Unknown Compression {0}", Properties.Compression));
                 }
 
-                StreamWriter writer = new StreamWriter(stream, Properties.Encoding);
-                foreach (string section in m_Data.Keys)
+                var writer = new StreamWriter(stream, Properties.Encoding);
+                foreach (string section in data.Keys)
                 {
                     writer.WriteLine("[" + section + "]");
                     bool allowOneEmpty = false;
-                    foreach (string setting in m_Data[section])
+                    foreach (string setting in data[section])
                     {
                         if (string.IsNullOrEmpty(setting) || (setting.Trim().Length == 0))
                         {
@@ -437,25 +428,25 @@ namespace Cave
         }
 
         /// <summary>Converts all settings to a new reader.</summary>
-        /// <returns></returns>
+        /// <returns>Returns a new <see cref="ISettings"/> instance containing all settings.</returns>
         public ISettings ToSettings()
         {
             return IniReader.Parse(Name, ToString(), Properties);
         }
 
         /// <summary>
-        /// Retrieves the whole data as string
+        /// Retrieves the whole data as string.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Returns the content of the settings in ini format.</returns>
         public override string ToString()
         {
-            using (StringWriter writer = new StringWriter())
+            using (var writer = new StringWriter())
             {
-                foreach (string section in m_Data.Keys)
+                foreach (string section in data.Keys)
                 {
                     writer.WriteLine("[" + section + "]");
                     bool allowOneEmpty = false;
-                    foreach (string setting in m_Data[section])
+                    foreach (string setting in data[section])
                     {
                         if (string.IsNullOrEmpty(setting) || (setting.Trim().Length == 0))
                         {

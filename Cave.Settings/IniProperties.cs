@@ -31,13 +31,13 @@ namespace Cave
 
         /// <summary>
         /// Obtains <see cref="IniProperties"/> with default settings:
-        /// Encoding=UTF8, Compression=None, InvariantCulture and no encryption
+        /// Encoding=UTF8, Compression=None, InvariantCulture and no encryption.
         /// </summary>
         public static IniProperties Default
         {
             get
             {
-                IniProperties result = new IniProperties();
+                var result = new IniProperties();
                 result.Culture = CultureInfo.InvariantCulture;
                 result.Compression = CompressionType.None;
                 result.Encoding = new UTF8Encoding(false);
@@ -60,7 +60,7 @@ namespace Cave
                 ;
             }
 
-            PasswordDeriveBytes PBKDF1 = new PasswordDeriveBytes(password, salt);
+            var PBKDF1 = new PasswordDeriveBytes(password, salt);
 			IniProperties result = Default;
 			result.Encryption = new RijndaelManaged();
 			result.Encryption.BlockSize = 128;
@@ -76,33 +76,33 @@ namespace Cave
         public bool CaseSensitive;
 
         /// <summary>
-        /// Use simple synchroneous encryption to protect from users eyes ? 
+        /// Use simple synchroneous encryption to protect from users eyes ?
         /// (This is not a security feature, use file system acl to protect from other users.)
         /// </summary>
         public SymmetricAlgorithm Encryption;
 
         /// <summary>
-        /// Gets / sets the culture used to en/decode values
+        /// Gets / sets the culture used to en/decode values.
         /// </summary>
         public CultureInfo Culture;
 
         /// <summary>
-        /// Gets / sets the <see cref="CompressionType"/>
+        /// Gets / sets the <see cref="CompressionType"/>.
         /// </summary>
         public CompressionType Compression;
 
         /// <summary>
-        /// Gets / sets the <see cref="Encoding"/>
+        /// Gets / sets the <see cref="Encoding"/>.
         /// </summary>
         public Encoding Encoding;
 
         /// <summary>
-        /// Gets / sets the format of date time fields
+        /// Gets / sets the format of date time fields.
         /// </summary>
         public string DateTimeFormat;
 
         /// <summary>
-        /// Obtains whether the properties are all set or not
+        /// Obtains whether the properties are all set or not.
         /// </summary>
         public bool Valid
         {
