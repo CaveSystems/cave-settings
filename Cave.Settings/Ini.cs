@@ -18,10 +18,10 @@ namespace Cave
     /// <seealso cref="SettingsReader" />
     public class Ini : SettingsReader
     {
-        static Ini m_UserIniFile;
-        static Ini m_LocalMachineIniFile;
-        static Ini m_LocalUserIniFile;
-        static Ini m_ProgramIniFile;
+        static Ini userIniFile;
+        static Ini localMachineIniFile;
+        static Ini localUserIniFile;
+        static Ini programIniFile;
 
         /// <summary>Gets the default ini file.</summary>
         /// <value>The default ini file.</value>
@@ -33,12 +33,13 @@ namespace Cave
         {
             get
             {
-                if (m_LocalUserIniFile == null)
+                if (localUserIniFile == null)
                 {
-                    FileLocation location = new FileLocation(root: RootLocation.LocalUserConfig, extension: PlatformExtension);
-                    m_LocalUserIniFile = new Ini(IniReader.FromLocation(location));
+                    var location = new FileLocation(root: RootLocation.LocalUserConfig, extension: PlatformExtension);
+                    FileSystem.TouchFile(location);
+                    localUserIniFile = new Ini(IniReader.FromLocation(location));
                 }
-                return m_LocalUserIniFile;
+                return localUserIniFile;
             }
         }
 
@@ -48,12 +49,13 @@ namespace Cave
         {
             get
             {
-                if (m_LocalMachineIniFile == null)
+                if (localMachineIniFile == null)
                 {
-                    FileLocation location = new FileLocation(root: RootLocation.AllUserConfig, extension: PlatformExtension);
-                    m_LocalMachineIniFile = new Ini(IniReader.FromLocation(location));
+                    var location = new FileLocation(root: RootLocation.AllUserConfig, extension: PlatformExtension);
+                    FileSystem.TouchFile(location);
+                    localMachineIniFile = new Ini(IniReader.FromLocation(location));
                 }
-                return m_LocalMachineIniFile;
+                return localMachineIniFile;
             }
         }
 
@@ -63,12 +65,13 @@ namespace Cave
         {
             get
             {
-                if (m_UserIniFile == null)
+                if (userIniFile == null)
                 {
-                    FileLocation location = new FileLocation(root: RootLocation.RoamingUserConfig, extension: PlatformExtension);
-                    m_UserIniFile = new Ini(IniReader.FromLocation(location));
+                    var location = new FileLocation(root: RootLocation.RoamingUserConfig, extension: PlatformExtension);
+                    FileSystem.TouchFile(location);
+                    userIniFile = new Ini(IniReader.FromLocation(location));
                 }
-                return m_UserIniFile;
+                return userIniFile;
             }
         }
 
@@ -78,12 +81,13 @@ namespace Cave
         {
             get
             {
-                if (m_ProgramIniFile == null)
+                if (programIniFile == null)
                 {
-                    FileLocation location = new FileLocation(root: RootLocation.Program, extension: PlatformExtension);
-                    m_ProgramIniFile = new Ini(IniReader.FromLocation(location));
+                    var location = new FileLocation(root: RootLocation.Program, extension: PlatformExtension);
+                    FileSystem.TouchFile(location);
+                    programIniFile = new Ini(IniReader.FromLocation(location));
                 }
-                return m_ProgramIniFile;
+                return programIniFile;
             }
         }
 
