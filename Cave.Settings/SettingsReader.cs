@@ -16,12 +16,15 @@ namespace Cave
         /// Initializes a new instance of the <see cref="SettingsReader"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        public SettingsReader(string name) { Name = name; }
+        public SettingsReader(string name)
+        {
+            Name = name;
+        }
 
         #region abstract class
 
         /// <summary>
-        /// Checks whether the config can be reloaded.
+        /// Gets a value indicating whether the config can be reloaded.
         /// </summary>
         public abstract bool CanReload { get; }
 
@@ -74,7 +77,7 @@ namespace Cave
         #endregion
 
         /// <summary>
-        /// Name of the settings.
+        /// Gets the name of the settings.
         /// </summary>
         public string Name { get; }
 
@@ -82,6 +85,7 @@ namespace Cave
         /// Reads a whole section from the ini (automatically removes empty lines and comments).
         /// </summary>
         /// <param name="section">Name of the section.</param>
+        /// <returns>Returns an array of string containing all section lines.</returns>
         public string[] ReadSection(string section)
         {
             return ReadSection(section, true);
@@ -102,7 +106,10 @@ namespace Cave
             foreach (string value in ReadSection(section, true))
             {
                 // try to parse enum value
-                try { result.Add((T)Enum.Parse(typeof(T), value.Trim(), true)); }
+                try
+                {
+                    result.Add((T)Enum.Parse(typeof(T), value.Trim(), true));
+                }
                 catch (Exception ex)
                 {
                     if (throwEx)
@@ -126,7 +133,7 @@ namespace Cave
         public T ReadStruct<T>(string section, bool throwEx = true)
             where T : struct
         {
-            object result = new T();
+            object result = default(T);
             ReadObject(section, result, throwEx);
             return (T)result;
         }
@@ -134,8 +141,8 @@ namespace Cave
         /// <summary>Reads a whole section as values of a struct.</summary>
         /// <typeparam name="T">The type of the struct.</typeparam>
         /// <param name="section">Section to read.</param>
-        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <param name="item">The structure.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
         public bool ReadStruct<T>(string section, ref T item, bool throwEx = true)
             where T : struct
@@ -165,8 +172,8 @@ namespace Cave
         /// Reads a whole section as values of an object (this does not work with structs).
         /// </summary>
         /// <param name="section">Section to read.</param>
-        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <param name="container">Container to set the field at.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
         public bool ReadObject(string section, object container, bool throwEx = false)
         {
@@ -205,7 +212,7 @@ namespace Cave
                 // yes, try to set value to field
                 try
                 {
-                    object obj = Convert.ChangeType(value, field.FieldType, Culture);
+                    object obj = SettingsField.ConvertValue(field.FieldType, value, Culture);
                     field.SetValue(container, obj);
                 }
                 catch (Exception ex)
@@ -448,7 +455,7 @@ namespace Cave
         }
 
         /// <summary>Reads the enum.</summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">Enum type.</typeparam>
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>

@@ -22,7 +22,7 @@ namespace Cave
         /// <param name="name">The (file)name.</param>
         /// <param name="data">Content to parse.</param>
         /// <param name="properties">The data properties.</param>
-        /// <returns></returns>
+        /// <returns>Returns a new <see cref="IniReader"/> instance.</returns>
         public static IniReader Parse(string name, string data, IniProperties properties = default)
         {
             return new IniReader(name, data.SplitNewLine(), properties);
@@ -32,7 +32,7 @@ namespace Cave
         /// <param name="name">The name.</param>
         /// <param name="data">Content to parse.</param>
         /// <param name="properties">The data properties.</param>
-        /// <returns></returns>
+        /// <returns>Returns a new <see cref="IniReader"/> instance.</returns>
         public static IniReader Parse(string name, byte[] data, IniProperties properties = default)
         {
             return Parse(name, Encoding.UTF8.GetString(data), properties);
@@ -42,7 +42,7 @@ namespace Cave
         /// <param name="name">The name.</param>
         /// <param name="lines">Content to parse.</param>
         /// <param name="properties">The content properties.</param>
-        /// <returns></returns>
+        /// <returns>Returns a new <see cref="IniReader"/> instance.</returns>
         public static IniReader Parse(string name, string[] lines, IniProperties properties = default)
         {
             return new IniReader(name, lines, properties);
@@ -51,7 +51,7 @@ namespace Cave
         /// <summary>Loads initialization data from file.</summary>
         /// <param name="fileName">File name to read.</param>
         /// <param name="properties">The content properties.</param>
-        /// <returns></returns>
+        /// <returns>Returns a new <see cref="IniReader"/> instance.</returns>
         public static IniReader FromFile(string fileName, IniProperties properties = default)
         {
             if (File.Exists(fileName))
@@ -66,7 +66,7 @@ namespace Cave
         /// <param name="stream">The stream to read.</param>
         /// <param name="count">Number of bytes to read.</param>
         /// <param name="properties">The content properties.</param>
-        /// <returns></returns>
+        /// <returns>Returns a new <see cref="IniReader"/> instance.</returns>
         public static IniReader FromStream(string name, Stream stream, int count, IniProperties properties = default)
         {
             byte[] data = stream.ReadBlock(count);
@@ -78,7 +78,7 @@ namespace Cave
         /// </summary>
         /// <param name="fileLocation">The file location.</param>
         /// <param name="properties">The content properties.</param>
-        /// <returns></returns>
+        /// <returns>Returns a new <see cref="IniReader"/> instance.</returns>
         public static IniReader FromLocation(FileLocation fileLocation, IniProperties properties = default)
         {
             if (fileLocation == null)
@@ -95,7 +95,7 @@ namespace Cave
         /// </summary>
         /// <param name="root">The root location.</param>
         /// <param name="properties">The content properties.</param>
-        /// <returns></returns>
+        /// <returns>Returns a new <see cref="IniReader"/> instance.</returns>
         public static IniReader FromLocation(RootLocation root, IniProperties properties = default)
         {
             var fileLocation = new FileLocation(root: root, extension: Ini.PlatformExtension);
@@ -106,10 +106,10 @@ namespace Cave
         /// <summary>
         /// Holds all lines of the configuration.
         /// </summary>
-        string[] m_Lines;
+        string[] lines;
 
         /// <summary>
-        /// Checks whether the config can be reloaded.
+        /// Gets a value indicating whether the config can be reloaded.
         /// </summary>
         public override bool CanReload
         {
@@ -125,8 +125,14 @@ namespace Cave
                     return false;
                 }
 
-                try { return File.Exists(Name); }
-                catch { return false; }
+                try
+                {
+                    return File.Exists(Name);
+                }
+                catch
+                {
+                    return false;
+                }
             }
         }
 
@@ -145,9 +151,9 @@ namespace Cave
             section = "[" + section + "]";
 
             int i = 0;
-            while (i < m_Lines.Length)
+            while (i < lines.Length)
             {
-                string line = m_Lines[i].Trim();
+                string line = lines[i].Trim();
                 if (string.Compare(line, section, !Properties.CaseSensitive, Properties.Culture) == 0)
                 {
                     return i;
@@ -200,7 +206,7 @@ namespace Cave
         }
 
         /// <summary>
-        /// Provides access to the IniProperties.
+        /// Gets or sets the properties.
         /// </summary>
         public IniProperties Properties { get; set; }
 
@@ -209,14 +215,17 @@ namespace Cave
         /// </summary>
         public override CultureInfo Culture => Properties.Culture;
 
-        /// <summary>Loads initialization data.</summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IniReader"/> class.
+        /// </summary>
         /// <param name="name">The (file)name.</param>
         /// <param name="lines">The lines.</param>
         /// <param name="properties">Properties of the initialization data.</param>
-        IniReader(string name, string[] lines, IniProperties properties = default) : base(name)
+        IniReader(string name, string[] lines, IniProperties properties = default)
+            : base(name)
         {
             Properties = properties.Valid ? properties : IniProperties.Default;
-            m_Lines = lines;
+            this.lines = lines;
         }
 
         /// <summary>
@@ -229,7 +238,7 @@ namespace Cave
                 throw new InvalidOperationException("Cannot reload!");
             }
 
-            m_Lines = Parse(File.ReadAllBytes(Name));
+            lines = Parse(File.ReadAllBytes(Name));
         }
 
         /// <summary>
@@ -249,7 +258,7 @@ namespace Cave
         public override string[] GetSectionNames()
         {
             var result = new List<string>();
-            foreach (string line in m_Lines)
+            foreach (string line in lines)
             {
                 string trimed = line.Trim();
                 if (trimed.StartsWith("[") && trimed.EndsWith("]"))
@@ -286,9 +295,9 @@ namespace Cave
 
             // got it, add lines to result
             var result = new List<string>();
-            for (; ++i < m_Lines.Length;)
+            for (; ++i < lines.Length;)
             {
-                string line = m_Lines[i];
+                string line = lines[i];
                 if (line.StartsWith("["))
                 {
                     break;
@@ -333,10 +342,10 @@ namespace Cave
             }
 
             // iterate all lines
-            for (++i; i < m_Lines.Length; i++)
+            for (++i; i < lines.Length; i++)
             {
-                string line = m_Lines[i].Trim();
-                if (line.StartsWith("[") && (line.EndsWith("]")))
+                string line = lines[i].Trim();
+                if (line.StartsWith("[") && line.EndsWith("]"))
                 {
                     break;
                 }
@@ -363,7 +372,7 @@ namespace Cave
                         string value = line.Substring(sign + 1).Trim();
                         if (value.Length < 1)
                         {
-                            return "";
+                            return string.Empty;
                         }
 
                         if (value[0] == '"' || value[0] == '\'')
@@ -389,15 +398,18 @@ namespace Cave
         /// Obtains a string array with the whole configuration.
         /// </summary>
         /// <returns>Returns an array containing all strings (lines) of the configuration.</returns>
-        public string[] ToArray() { return (string[])m_Lines.Clone(); }
+        public string[] ToArray()
+        {
+            return (string[])lines.Clone();
+        }
 
         /// <summary>
         /// Retrieves the whole data as string.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Returns a new string.</returns>
         public override string ToString()
         {
-            return StringExtensions.JoinNewLine(m_Lines);
+            return StringExtensions.JoinNewLine(lines);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Cave
     public interface ISettings
     {
         /// <summary>
-        /// Name of the settings.
+        /// Gets the name of the settings.
         /// </summary>
         string Name { get; }
 
@@ -30,6 +30,7 @@ namespace Cave
         /// Reads a whole section from the settings (automatically removes empty lines and comments).
         /// </summary>
         /// <param name="section">Name of the section.</param>
+        /// <returns>Returns an array of string containing all section names.</returns>
         string[] ReadSection(string section);
 
         /// <summary>
@@ -72,9 +73,10 @@ namespace Cave
         /// Reads a whole section as values of a struct.
         /// </summary>
         /// <param name="section">Section to read.</param>
-        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <param name="container">Container to set the field at.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
+        /// <typeparam name="T">Structure type.</typeparam>
         bool ReadStruct<T>(string section, ref T container, bool throwEx = true)
             where T : struct;
 
@@ -92,13 +94,13 @@ namespace Cave
         /// Reads a whole section as values of an object (this does not work with structs).
         /// </summary>
         /// <param name="section">Section to read.</param>
-        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <param name="container">Container to set the field at.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
         bool ReadObject(string section, object container, bool throwEx = true);
 
         /// <summary>
-        /// Checks whether the config can be reload.
+        /// Gets a value indicating whether the config can be reload.
         /// </summary>
         bool CanReload { get; }
 
@@ -211,7 +213,7 @@ namespace Cave
         DateTime ReadDateTime(string section, string name, DateTime? defaultValue = null);
 
         /// <summary>Reads the enum.</summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">Enum type.</typeparam>
         /// <param name="section">The section.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>

@@ -1,8 +1,8 @@
-using Cave.Compression;
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using Cave.Compression;
 
 namespace Cave
 {
@@ -30,45 +30,46 @@ namespace Cave
         }
 
         /// <summary>
-        /// Obtains <see cref="IniProperties"/> with default settings:
+        /// Gets <see cref="IniProperties"/> with default settings:
         /// Encoding=UTF8, Compression=None, InvariantCulture and no encryption.
         /// </summary>
         public static IniProperties Default
         {
             get
             {
-                var result = new IniProperties();
-                result.Culture = CultureInfo.InvariantCulture;
-                result.Compression = CompressionType.None;
-                result.Encoding = new UTF8Encoding(false);
-                result.DateTimeFormat = StringExtensions.InterOpDateTimeFormat;
+                var result = new IniProperties
+                {
+                    Culture = CultureInfo.InvariantCulture,
+                    Compression = CompressionType.None,
+                    Encoding = new UTF8Encoding(false),
+                    DateTimeFormat = StringExtensions.InterOpDateTimeFormat,
+                };
                 return result;
             }
         }
 
-		/// <summary>
-		/// Obtains <see cref="IniProperties"/> with default settings and simple encryption.
-		/// (This is not a security feature, use file system acl to protect from other users.)
-		/// </summary>
-		/// <param name="password"></param>
-		/// <returns></returns>
-		public static IniProperties Encrypted(string password)
-		{
-			byte[] salt = new byte[16];
-			for (byte i = 0; i < salt.Length; salt[i] = ++i)
+        /// <summary>
+        /// Obtains <see cref="IniProperties"/> with default settings and simple encryption.
+        /// (This is not a security feature, use file system acl to protect from other users.)
+        /// </summary>
+        /// <param name="password">Password to use.</param>
+        /// <returns>Returns a new <see cref="IniProperties"/> instance.</returns>
+        public static IniProperties Encrypted(string password)
+        {
+            byte[] salt = new byte[16];
+            for (byte i = 0; i < salt.Length; salt[i] = ++i)
             {
-                ;
             }
 
-            var PBKDF1 = new PasswordDeriveBytes(password, salt);
-			IniProperties result = Default;
-			result.Encryption = new RijndaelManaged();
-			result.Encryption.BlockSize = 128;
-			result.Encryption.Key = PBKDF1.GetBytes(result.Encryption.KeySize / 8);
-			result.Encryption.IV = PBKDF1.GetBytes(result.Encryption.BlockSize / 8);
-			(PBKDF1 as IDisposable)?.Dispose();
-			return result;
-		}
+            var pkkdf1 = new PasswordDeriveBytes(password, salt);
+            IniProperties result = Default;
+            result.Encryption = new RijndaelManaged();
+            result.Encryption.BlockSize = 128;
+            result.Encryption.Key = pkkdf1.GetBytes(result.Encryption.KeySize / 8);
+            result.Encryption.IV = pkkdf1.GetBytes(result.Encryption.BlockSize / 8);
+            (pkkdf1 as IDisposable)?.Dispose();
+            return result;
+        }
 
         /// <summary>
         /// Default is case insensitive. Set this to true to match properties exactly.
@@ -102,7 +103,7 @@ namespace Cave
         public string DateTimeFormat;
 
         /// <summary>
-        /// Obtains whether the properties are all set or not.
+        /// Gets a value indicating whether the properties are all set or not.
         /// </summary>
         public bool Valid
         {
