@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -210,14 +211,9 @@ namespace Cave
         /// <param name="values">The values.</param>
         public void WriteSection(string section, IEnumerable values)
         {
-            if (section == null)
-            {
-                throw new ArgumentNullException("section");
-            }
-
             if (values == null)
             {
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             }
 
             var strings = new List<string>();
@@ -237,12 +233,12 @@ namespace Cave
         {
             if (section == null)
             {
-                throw new ArgumentNullException("section");
+                throw new ArgumentNullException(nameof(section));
             }
 
             if (lines == null)
             {
-                throw new ArgumentNullException("lines");
+                throw new ArgumentNullException(nameof(lines));
             }
 
             var result = new List<string>();
@@ -256,22 +252,10 @@ namespace Cave
         /// <typeparam name="T">The struct type.</typeparam>
         /// <param name="section">The section to write to.</param>
         /// <param name="item">The struct.</param>
+        [Obsolete("Use WriteFields instead!")]
         public void WriteStruct<T>(string section, T item)
             where T : struct
-        {
-            if (section == null)
-            {
-                throw new ArgumentNullException("section");
-            }
-
-            var lines = new List<string>();
-            foreach (FieldInfo field in item.GetType().GetFields())
-            {
-                string value = StringExtensions.ToString(field.GetValue(item), Properties.Culture);
-                lines.Add(field.Name + "=" + value);
-            }
-            data[section] = lines;
-        }
+            => WriteFields<T>(section, item);
 
         /// <summary>
         /// Writes all fields of the object to the specified section (replacing a present one).
@@ -279,26 +263,49 @@ namespace Cave
         /// <typeparam name="T">The class type.</typeparam>
         /// <param name="section">The section to write to.</param>
         /// <param name="obj">The object.</param>
+        [Obsolete("Use WriteFields instead!")]
         public void WriteObject<T>(string section, T obj)
             where T : class
-        {
-            if (section == null)
-            {
-                throw new ArgumentNullException("section");
-            }
+            => WriteFields<T>(section, obj);
 
+        /// <summary>
+        /// Writes all fields of the object to the specified section (replacing a present one).
+        /// </summary>
+        /// <typeparam name="T">The class type.</typeparam>
+        /// <param name="section">The section to write to.</param>
+        /// <param name="obj">The object.</param>
+        public void WriteFields<T>(string section, T obj)
+        {
             if (obj == null)
             {
-                throw new ArgumentNullException("obj");
+                throw new ArgumentNullException(nameof(obj));
             }
 
-            var sections = new List<string>();
-            foreach (FieldInfo field in obj.GetType().GetFields())
+            foreach (var field in obj.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
             {
-                string value = StringExtensions.ToString(field.GetValue(obj), Properties.Culture);
-                sections.Add(field.Name + "=" + value);
+                var value = field.GetValue(obj);
+                WriteSetting(section, field.Name, value);
             }
-            data[section] = sections;
+        }
+
+        /// <summary>
+        /// Writes all properties of the object to the specified section (replacing a present one).
+        /// </summary>
+        /// <typeparam name="T">The class type.</typeparam>
+        /// <param name="section">The section to write to.</param>
+        /// <param name="obj">The object.</param>
+        public void WriteProperties<T>(string section, T obj)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+
+            foreach (var field in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                var value = field.GetValue(obj, null);
+                WriteSetting(section, field.Name, value);
+            }
         }
 
         /// <summary>
@@ -309,7 +316,7 @@ namespace Cave
         /// <param name="value">Value of the setting.</param>
         public void WriteSetting(string section, string name, object value)
         {
-            WriteSetting(section, name, StringExtensions.ToString(value, Properties.Culture));
+            WriteSetting(section, name, value is null ? null : StringExtensions.ToString(value, Properties.Culture));
         }
 
         /// <summary>
@@ -322,33 +329,38 @@ namespace Cave
         {
             if (section == null)
             {
-                throw new ArgumentNullException("section");
+                throw new ArgumentNullException(nameof(section));
             }
 
             if (name == null)
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             if (value == null)
             {
-                throw new ArgumentNullException("value");
+                RemoveSetting(section, name);
+                return;
+            }
+
+            if (value.Any(c => c < 32))
+            {
+                throw new ArgumentException($"Setting {name}: Value may not contain any ascii control code. Use .Escape() or .EscapeUtf8() to save this value!", nameof(value));
+            }
+
+            if (value.IndexOf('#') > -1 || value.Trim() != value || value.UnboxText(false) != value)
+            {
+                value = value.Box('"');
             }
 
             if (name.IndexOf('=') > -1)
             {
-                throw new ArgumentException(string.Format("Name may not contain an equal sign!"));
+                throw new ArgumentException($"Setting {name}: Name may not contain an equal sign!", nameof(name));
             }
 
-            List<string> result;
-            if (data.ContainsKey(section))
+            if (!data.TryGetValue(section, out List<string> result))
             {
-                result = data[section];
-            }
-            else
-            {
-                result = new List<string>();
-                data[section] = result;
+                data[section] = result = new List<string>();
             }
 
             // try to replace first
@@ -364,6 +376,41 @@ namespace Cave
 
             // add new one
             result.Add(name + "=" + value);
+        }
+
+        /// <summary>
+        /// Removes a setting from the ini file.
+        /// </summary>
+        /// <param name="section">Name of the section.</param>
+        /// <param name="name">Name of the setting.</param>
+        /// <returns>Returns true if the setting was removed, false if it was not present.</returns>
+        public bool RemoveSetting(string section, string name)
+        {
+            if (section == null)
+            {
+                throw new ArgumentNullException(nameof(section));
+            }
+
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            if (!data.TryGetValue(section, out List<string> items))
+            {
+                return false;
+            }
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                string setting = items[i].BeforeFirst('=').Trim();
+                if (string.Equals(setting, name.Trim(), StringComparison.OrdinalIgnoreCase))
+                {
+                    items.RemoveAt(i);
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -440,30 +487,28 @@ namespace Cave
         /// <returns>Returns the content of the settings in ini format.</returns>
         public override string ToString()
         {
-            using (var writer = new StringWriter())
+            using var writer = new StringWriter();
+            foreach (string section in data.Keys)
             {
-                foreach (string section in data.Keys)
+                writer.WriteLine("[" + section + "]");
+                bool allowOneEmpty = false;
+                foreach (string setting in data[section])
                 {
-                    writer.WriteLine("[" + section + "]");
-                    bool allowOneEmpty = false;
-                    foreach (string setting in data[section])
+                    if (string.IsNullOrEmpty(setting) || (setting.Trim().Length == 0))
                     {
-                        if (string.IsNullOrEmpty(setting) || (setting.Trim().Length == 0))
+                        if (allowOneEmpty)
                         {
-                            if (allowOneEmpty)
-                            {
-                                writer.WriteLine();
-                                allowOneEmpty = false;
-                            }
-                            continue;
+                            writer.WriteLine();
+                            allowOneEmpty = false;
                         }
-                        writer.WriteLine(setting);
-                        allowOneEmpty = true;
+                        continue;
                     }
-                    writer.WriteLine();
+                    writer.WriteLine(setting);
+                    allowOneEmpty = true;
                 }
-                return writer.ToString();
+                writer.WriteLine();
             }
+            return writer.ToString();
         }
     }
 }

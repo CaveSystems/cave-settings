@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Cave.Compression;
@@ -108,6 +109,26 @@ namespace Cave
         /// </summary>
         string[] lines;
 
+        Dictionary<string, int> sections = null;
+
+        Dictionary<string, int> GetSectionIndices()
+        {
+            if (sections == null)
+            {
+                sections = new Dictionary<string, int>(Properties.CaseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string trimed = lines[i].Trim();
+                    if (trimed.StartsWith("[") && trimed.EndsWith("]"))
+                    {
+                        var name = trimed.Substring(1, trimed.Length - 2).Trim();
+                        sections.TryAdd(name, i);
+                    }
+                }
+            }
+            return sections;
+        }
+
         /// <summary>
         /// Gets a value indicating whether the config can be reloaded.
         /// </summary>
@@ -143,25 +164,17 @@ namespace Cave
         /// <returns>Returns the index the section starts at.</returns>
         int SectionStart(string section)
         {
+            var sections = GetSectionIndices();
             if (section == null)
             {
                 return 0;
             }
 
-            section = "[" + section + "]";
-
-            int i = 0;
-            while (i < lines.Length)
+            if (!sections.TryGetValue(section, out int result))
             {
-                string line = lines[i].Trim();
-                if (string.Compare(line, section, !Properties.CaseSensitive, Properties.Culture) == 0)
-                {
-                    return i;
-                }
-
-                i++;
+                result = -1;
             }
-            return -1;
+            return result;
         }
 
         string[] Parse(byte[] data)
@@ -257,16 +270,8 @@ namespace Cave
         /// <returns>Returns an array of all section names.</returns>
         public override string[] GetSectionNames()
         {
-            var result = new List<string>();
-            foreach (string line in lines)
-            {
-                string trimed = line.Trim();
-                if (trimed.StartsWith("[") && trimed.EndsWith("]"))
-                {
-                    result.Add(trimed.Substring(1, trimed.Length - 2).Trim());
-                }
-            }
-            return result.ToArray();
+            var sections = GetSectionIndices();
+            return sections.Keys.ToArray();
         }
 
         /// <summary>
@@ -345,20 +350,23 @@ namespace Cave
             for (++i; i < lines.Length; i++)
             {
                 string line = lines[i].Trim();
-                if (line.StartsWith("[") && line.EndsWith("]"))
+                int last = line.Length - 1;
+
+                if (last < 0)
+                {
+                    continue;
+                }
+
+                if ((line[0] == '[') && (line[last] == ']'))
                 {
                     break;
                 }
 
                 // ignore comments
-                if (line.StartsWith("#"))
+                switch (line[0])
                 {
-                    continue;
-                }
-
-                if (line.StartsWith(";"))
-                {
-                    continue;
+                    case '#': continue;
+                    case ';': continue;
                 }
 
                 // find equal sign

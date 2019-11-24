@@ -66,7 +66,28 @@ namespace Cave
         /// <param name="section">Section to read.</param>
         /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <returns>Returns a new struct instance.</returns>
+        [Obsolete("Use ReadStructFields instead!")]
         T ReadStruct<T>(string section, bool throwEx = true)
+            where T : struct;
+
+        /// <summary>
+        /// Reads a whole section as values of a struct.
+        /// </summary>
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns a new struct instance.</returns>
+        T ReadStructFields<T>(string section, bool throwEx = true)
+            where T : struct;
+
+        /// <summary>
+        /// Reads a whole section as values of a struct.
+        /// </summary>
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns a new struct instance.</returns>
+        T ReadStructProperties<T>(string section, bool throwEx = true)
             where T : struct;
 
         /// <summary>
@@ -77,7 +98,30 @@ namespace Cave
         /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
         /// <typeparam name="T">Structure type.</typeparam>
+        [Obsolete("Use ReadStructFields instead!")]
         bool ReadStruct<T>(string section, ref T container, bool throwEx = true)
+            where T : struct;
+
+        /// <summary>
+        /// Reads a whole section as values of a struct.
+        /// </summary>
+        /// <param name="section">Section to read.</param>
+        /// <param name="container">Container to set the field at.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
+        /// <typeparam name="T">Structure type.</typeparam>
+        bool ReadStructFields<T>(string section, ref T container, bool throwEx = true)
+            where T : struct;
+
+        /// <summary>
+        /// Reads a whole section as values of a struct.
+        /// </summary>
+        /// <param name="section">Section to read.</param>
+        /// <param name="container">Container to set the field at.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
+        /// <typeparam name="T">Structure type.</typeparam>
+        bool ReadStructProperties<T>(string section, ref T container, bool throwEx = true)
             where T : struct;
 
         /// <summary>
@@ -87,7 +131,28 @@ namespace Cave
         /// <param name="section">Section to read.</param>
         /// <param name="throwEx">Throw an error for any invalid value in the section.</param>
         /// <returns>Returns a new struct instance.</returns>
+        [Obsolete("Use ReadObjectFields instead!")]
         T ReadObject<T>(string section, bool throwEx = true)
+            where T : class, new();
+
+        /// <summary>
+        /// Reads a whole section as values of a struct.
+        /// </summary>
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="throwEx">Throw an error for any invalid value in the section.</param>
+        /// <returns>Returns a new struct instance.</returns>
+        T ReadObjectFields<T>(string section, bool throwEx = true)
+            where T : class, new();
+
+        /// <summary>
+        /// Reads a whole section as values of a struct.
+        /// </summary>
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="throwEx">Throw an error for any invalid value in the section.</param>
+        /// <returns>Returns a new struct instance.</returns>
+        T ReadObjectProperties<T>(string section, bool throwEx = true)
             where T : class, new();
 
         /// <summary>
@@ -97,7 +162,26 @@ namespace Cave
         /// <param name="container">Container to set the field at.</param>
         /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
+        [Obsolete("Use ReadObjectFields instead.")]
         bool ReadObject(string section, object container, bool throwEx = true);
+
+        /// <summary>
+        /// Reads a whole section as values of an object (this does not work with structs).
+        /// </summary>
+        /// <param name="section">Section to read.</param>
+        /// <param name="container">Container to set the field at.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
+        bool ReadObjectFields(string section, object container, bool throwEx = true);
+
+        /// <summary>
+        /// Reads a whole section as values of an object (this does not work with structs).
+        /// </summary>
+        /// <param name="section">Section to read.</param>
+        /// <param name="container">Container to set the field at.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
+        bool ReadObjectProperties(string section, object container, bool throwEx = true);
 
         /// <summary>
         /// Gets a value indicating whether the config can be reload.

@@ -130,11 +130,38 @@ namespace Cave
         /// <param name="section">Section to read.</param>
         /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <returns>Returns a new struct instance.</returns>
+        [Obsolete("Use ReadStructFields instead")]
         public T ReadStruct<T>(string section, bool throwEx = true)
+            where T : struct
+            => ReadStructFields<T>(section, throwEx);
+
+        /// <summary>
+        /// Reads a whole section as values of a struct.
+        /// </summary>
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns a new struct instance.</returns>
+        public T ReadStructFields<T>(string section, bool throwEx = true)
             where T : struct
         {
             object result = default(T);
-            ReadObject(section, result, throwEx);
+            ReadObjectFields(section, result, throwEx);
+            return (T)result;
+        }
+
+        /// <summary>
+        /// Reads a whole section as values of a struct.
+        /// </summary>
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns a new struct instance.</returns>
+        public T ReadStructProperties<T>(string section, bool throwEx = true)
+            where T : struct
+        {
+            object result = default(T);
+            ReadObjectProperties(section, result, throwEx);
             return (T)result;
         }
 
@@ -144,11 +171,37 @@ namespace Cave
         /// <param name="item">The structure.</param>
         /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
+        [Obsolete("Use ReadStructFields instead")]
         public bool ReadStruct<T>(string section, ref T item, bool throwEx = true)
+            where T : struct
+            => ReadStructFields<T>(section, ref item, throwEx);
+
+        /// <summary>Reads a whole section as values of a struct.</summary>
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="item">The structure.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
+        public bool ReadStructFields<T>(string section, ref T item, bool throwEx = true)
             where T : struct
         {
             object box = item;
-            var result = ReadObject(section, box, throwEx);
+            var result = ReadObjectFields(section, box, throwEx);
+            item = (T)box;
+            return result;
+        }
+
+        /// <summary>Reads a whole section as values of a struct.</summary>
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="item">The structure.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
+        public bool ReadStructProperties<T>(string section, ref T item, bool throwEx = true)
+            where T : struct
+        {
+            object box = item;
+            var result = ReadObjectProperties(section, box, throwEx);
             item = (T)box;
             return result;
         }
@@ -160,11 +213,38 @@ namespace Cave
         /// <param name="section">Section to read.</param>
         /// <param name="throwEx">Throw an error for any invalid value in the section.</param>
         /// <returns>Returns a new struct instance.</returns>
+        [Obsolete("Use ReadObjectFields instead")]
         public T ReadObject<T>(string section, bool throwEx)
+            where T : class, new()
+            => ReadObjectFields<T>(section, throwEx);
+
+        /// <summary>
+        /// Reads a whole section as values of a struct.
+        /// </summary>
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="throwEx">Throw an error for any invalid value in the section.</param>
+        /// <returns>Returns a new struct instance.</returns>
+        public T ReadObjectFields<T>(string section, bool throwEx)
             where T : class, new()
         {
             object result = new T();
-            ReadObject(section, result, throwEx);
+            ReadObjectFields(section, result, throwEx);
+            return (T)result;
+        }
+
+        /// <summary>
+        /// Reads a whole section as values of a struct.
+        /// </summary>
+        /// <typeparam name="T">The type of the struct.</typeparam>
+        /// <param name="section">Section to read.</param>
+        /// <param name="throwEx">Throw an error for any invalid value in the section.</param>
+        /// <returns>Returns a new struct instance.</returns>
+        public T ReadObjectProperties<T>(string section, bool throwEx)
+            where T : class, new()
+        {
+            object result = new T();
+            ReadObjectProperties(section, result, throwEx);
             return (T)result;
         }
 
@@ -175,7 +255,17 @@ namespace Cave
         /// <param name="container">Container to set the field at.</param>
         /// <param name="throwEx">Throw an error for any unset value in the section.</param>
         /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
-        public bool ReadObject(string section, object container, bool throwEx = false)
+        [Obsolete("Use ReadObjectFields instead")]
+        public bool ReadObject(string section, object container, bool throwEx = false) => ReadObjectFields(section, container, throwEx);
+
+        /// <summary>
+        /// Reads a whole section as values of an object (this does not work with structs).
+        /// </summary>
+        /// <param name="section">Section to read.</param>
+        /// <param name="container">Container to set the field at.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
+        public bool ReadObjectFields(string section, object container, bool throwEx = false)
         {
             if (container == null)
             {
@@ -183,8 +273,8 @@ namespace Cave
             }
 
             // iterate all fields of the struct
-            Type type = container.GetType();
-            FieldInfo[] fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+            var type = container.GetType();
+            var fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
             if (fields.Length == 0)
             {
                 if (!throwEx)
@@ -196,23 +286,22 @@ namespace Cave
             }
             bool result = true;
             int i = 0;
-            foreach (FieldInfo field in fields)
+            foreach (var field in fields)
             {
                 i++;
 
                 // yes, can we read a value from the config for this field ?
                 string value = ReadSetting(section, field.Name);
-                if (string.IsNullOrEmpty(value))
+                if (value is null)
                 {
                     Trace.TraceError($"Field is not set, using default value: {field.FieldType.Name} {field.Name}");
                     continue;
                 }
-                value = value.UnboxText(false);
 
                 // yes, try to set value to field
                 try
                 {
-                    object obj = SettingsField.ConvertValue(field.FieldType, value, Culture);
+                    object obj = TypeExtension.ConvertValue(field.FieldType, value, Culture);
                     field.SetValue(container, obj);
                 }
                 catch (Exception ex)
@@ -247,7 +336,85 @@ namespace Cave
             return result;
         }
 
-        #region Read Value Members
+        /// <summary>
+        /// Reads a whole section as values of an object (this does not work with structs).
+        /// </summary>
+        /// <param name="section">Section to read.</param>
+        /// <param name="container">Container to set the field at.</param>
+        /// <param name="throwEx">Throw an error for any unset value in the section.</param>
+        /// <returns>Returns true if all fields could be read. Throws an exception or returns false otherwise.</returns>
+        public bool ReadObjectProperties(string section, object container, bool throwEx = false)
+        {
+            if (container == null)
+            {
+                throw new ArgumentNullException("container");
+            }
+
+            // iterate all fields of the struct
+            var type = container.GetType();
+            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            if (properties.Length == 0)
+            {
+                if (!throwEx)
+                {
+                    return false;
+                }
+
+                throw new ArgumentException("Container does not have any fields!");
+            }
+            bool result = true;
+            int i = 0;
+            foreach (var property in properties)
+            {
+                i++;
+
+                // yes, can we read a value from the config for this field ?
+                string value = ReadSetting(section, property.Name);
+                if (value is null)
+                {
+                    Trace.TraceError($"Field is not set, using default value: {property.PropertyType.Name} {property.Name}");
+                    continue;
+                }
+
+                // yes, try to set value to field
+                try
+                {
+                    object obj = TypeExtension.ConvertValue(property.PropertyType, value, Culture);
+                    property.SetValue(container, obj, null);
+                }
+                catch (Exception ex)
+                {
+                    string message = $"Invalid field value {value} for field {property.PropertyType.Name} {property.Name}";
+                    if (throwEx)
+                    {
+                        throw new InvalidDataException(message, ex);
+                    }
+                    else
+                    {
+                        Trace.TraceWarning(message);
+                    }
+
+                    result = false;
+                }
+            }
+            if (i == 0)
+            {
+                string message = $"No field in section {section}!";
+                if (throwEx)
+                {
+                    throw new ArgumentException(message, nameof(container));
+                }
+                else
+                {
+                    Trace.TraceWarning(message);
+                }
+
+                result = false;
+            }
+            return result;
+        }
+
+#region Read Value Members
 
         /// <summary>Reads a string value.</summary>
         /// <param name="section">The section.</param>
@@ -475,8 +642,8 @@ namespace Cave
             return result;
         }
 
-        #endregion Read Value Members
-        #region GetValue Members
+#endregion Read Value Members
+#region GetValue Members
 
         /// <summary>
         /// Directly obtains a value from the specified subsection(s) with the specified name.
@@ -751,7 +918,7 @@ namespace Cave
 
             return result;
         }
-        #endregion
+#endregion
 
     }
 }
