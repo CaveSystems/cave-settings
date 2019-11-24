@@ -214,7 +214,7 @@ namespace Cave
         /// <param name="throwEx">Throw an error for any invalid value in the section.</param>
         /// <returns>Returns a new struct instance.</returns>
         [Obsolete("Use ReadObjectFields instead")]
-        public T ReadObject<T>(string section, bool throwEx)
+        public T ReadObject<T>(string section, bool throwEx = false)
             where T : class, new()
             => ReadObjectFields<T>(section, throwEx);
 
@@ -225,7 +225,7 @@ namespace Cave
         /// <param name="section">Section to read.</param>
         /// <param name="throwEx">Throw an error for any invalid value in the section.</param>
         /// <returns>Returns a new struct instance.</returns>
-        public T ReadObjectFields<T>(string section, bool throwEx)
+        public T ReadObjectFields<T>(string section, bool throwEx = false)
             where T : class, new()
         {
             object result = new T();
@@ -240,7 +240,7 @@ namespace Cave
         /// <param name="section">Section to read.</param>
         /// <param name="throwEx">Throw an error for any invalid value in the section.</param>
         /// <returns>Returns a new struct instance.</returns>
-        public T ReadObjectProperties<T>(string section, bool throwEx)
+        public T ReadObjectProperties<T>(string section, bool throwEx = false)
             where T : class, new()
         {
             object result = new T();
