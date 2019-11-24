@@ -18,6 +18,8 @@ namespace Cave
     /// <seealso cref="SettingsReader" />
     public class Ini : SettingsReader
     {
+        #region static class
+
         static Ini userIniFile;
         static Ini localMachineIniFile;
         static Ini localUserIniFile;
@@ -111,6 +113,8 @@ namespace Cave
                 }
             }
         }
+
+        #endregion
 
         /// <summary>Gets a value indicating whether the config can be reloaded.</summary>
         public override bool CanReload => true;
@@ -348,13 +352,10 @@ namespace Cave
         public void WriteStruct<T>(string sectionName, T item)
             where T : struct
         {
-            var newSection = new List<string>();
             foreach (FieldInfo field in item.GetType().GetFields())
             {
-                string value = StringExtensions.ToString(field.GetValue(item), Culture);
-                newSection.Add(field.Name + " = " + value);
+                WriteSetting(sectionName, field.Name, field.GetValue(item));
             }
-            WriteSection(sectionName, newSection);
         }
 
         /// <summary>
@@ -368,16 +369,13 @@ namespace Cave
         {
             if (obj == null)
             {
-                throw new ArgumentNullException("obj");
+                throw new ArgumentNullException(nameof(obj));
             }
 
-            var newSection = new List<string>();
             foreach (FieldInfo field in obj.GetType().GetFields())
             {
-                string value = StringExtensions.ToString(field.GetValue(obj), Culture);
-                newSection.Add(field.Name + " = " + value);
+                WriteSetting(sectionName, field.Name, field.GetValue(obj));
             }
-            WriteSection(sectionName, newSection);
         }
 
         /// <summary>
@@ -388,6 +386,10 @@ namespace Cave
         /// <param name="value">Value of the setting.</param>
         public void WriteSetting(string section, string name, object value)
         {
+            if (value is null)
+            {
+                RemoveSetting(section, name);
+            }
             WriteSetting(section, name, StringExtensions.ToString(value, Culture));
         }
 
@@ -414,6 +416,11 @@ namespace Cave
                 throw new ArgumentException(string.Format("Name may not contain an equal sign!"));
             }
 
+            if (value is null)
+            {
+                RemoveSetting(sectionName, name);
+            }
+
             Section section = GetSection(sectionName);
             if (section == null)
             {
@@ -427,6 +434,31 @@ namespace Cave
                 section.Items.Add(item);
             }
             item.Value = value;
+        }
+
+        /// <summary>
+        /// Removes a setting from the ini file.
+        /// </summary>
+        /// <param name="sectionName">Name of the section.</param>
+        /// <param name="name">Name of the setting.</param>
+        /// <returns>Returns true if the setting was removed, false if it was not present.</returns>
+        public bool RemoveSetting(string sectionName, string name)
+        {
+            Section section = GetSection(sectionName);
+            if (section == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < section.Items.Count; i++)
+            {
+                if (string.Equals(section.Items[i].Name, name, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    section.Items.RemoveAt(i);
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
