@@ -54,11 +54,12 @@ namespace Test
                 if (str[i] < 32) str[i] = '_';
             }
 
+            var dateTime = DateTime.Today.AddSeconds(random.Next(1, 60 * 60 * 24));
             return new SettingsStructFields()
             {
                 SampleString = new string(str),
                 SampleBool = random.Next(1, 100) < 51,
-                SampleDateTime = new DateTime(DateTime.Now.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond),
+                SampleDateTime = dateTime,
                 SampleTimeSpan = TimeSpan.FromSeconds(random.NextDouble()),
                 SampleDecimal = (decimal)random.NextDouble() / (decimal)random.NextDouble(),
                 SampleDouble = random.NextDouble(),
