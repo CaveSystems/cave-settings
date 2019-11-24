@@ -487,28 +487,30 @@ namespace Cave
         /// <returns>Returns the content of the settings in ini format.</returns>
         public override string ToString()
         {
-            using var writer = new StringWriter();
-            foreach (string section in data.Keys)
+            using (var writer = new StringWriter())
             {
-                writer.WriteLine("[" + section + "]");
-                bool allowOneEmpty = false;
-                foreach (string setting in data[section])
+                foreach (string section in data.Keys)
                 {
-                    if (string.IsNullOrEmpty(setting) || (setting.Trim().Length == 0))
+                    writer.WriteLine("[" + section + "]");
+                    bool allowOneEmpty = false;
+                    foreach (string setting in data[section])
                     {
-                        if (allowOneEmpty)
+                        if (string.IsNullOrEmpty(setting) || (setting.Trim().Length == 0))
                         {
-                            writer.WriteLine();
-                            allowOneEmpty = false;
+                            if (allowOneEmpty)
+                            {
+                                writer.WriteLine();
+                                allowOneEmpty = false;
+                            }
+                            continue;
                         }
-                        continue;
+                        writer.WriteLine(setting);
+                        allowOneEmpty = true;
                     }
-                    writer.WriteLine(setting);
-                    allowOneEmpty = true;
+                    writer.WriteLine();
                 }
-                writer.WriteLine();
+                return writer.ToString();
             }
-            return writer.ToString();
         }
     }
 }
