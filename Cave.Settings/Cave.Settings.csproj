@@ -75,11 +75,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net20' OR '$(TargetFramework)'=='netstandard1.3'">
-    <PackageReference Include="Cave.Backports" Version="1.*" />
+    <PackageReference Include="Cave.Backports" Version="1.0.7" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Cave.AssemblyVersionInfo" Version="1.0.3" />
-    <PackageReference Include="Cave.Backports" Version="1.0.7" />
     <PackageReference Include="Cave.Compression" Version="1.0.2" />
     <PackageReference Include="Cave.Extensions" Version="1.0.10" />
     <PackageReference Include="Cave.FileSystem" Version="1.1.2" />
