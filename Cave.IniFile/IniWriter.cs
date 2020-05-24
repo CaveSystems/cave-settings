@@ -8,7 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using Cave.Compression;
 
 namespace Cave
 {
@@ -18,6 +17,65 @@ namespace Cave
     [DebuggerDisplay("{Name}")]
     public class IniWriter
     {
+        readonly Dictionary<string, List<string>> data = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+        #region construtors
+
+        /// <summary>Initializes a new instance of the <see cref="IniWriter"/> class.</summary>
+        public IniWriter()
+        {
+            Properties = IniProperties.Default;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IniWriter"/> class.
+        /// </summary>
+        /// <param name="fileName">Name of the file to write to.</param>
+        /// <param name="properties">Encoding properties.</param>
+        public IniWriter(string fileName, IniProperties properties)
+        {
+            Properties = properties.Valid ? properties : IniProperties.Default;
+            Name = fileName;
+            if (File.Exists(fileName))
+            {
+                Load(IniReader.FromFile(fileName));
+            }
+            else
+            {
+                using (var f = File.Open(fileName, FileMode.OpenOrCreate))
+                {
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IniWriter"/> class.
+        /// </summary>
+        /// <param name="reader">Settings to initialize the writer from.</param>
+        public IniWriter(ISettings reader)
+        {
+            if (reader == null)
+            {
+                throw new ArgumentNullException("reader");
+            }
+
+            Name = reader.Name;
+            Properties = reader.Properties;
+            Load(reader);
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Gets or sets the IniProperties.
+        /// </summary>
+        public IniProperties Properties { get; set; }
+
+        /// <summary>
+        /// Gets or sets name of the ini writer.
+        /// </summary>
+        public string Name { get; set; }
+
         #region static constructors
 
         /// <summary>Creates an new initialization writer by parsing the specified data.</summary>
@@ -71,96 +129,7 @@ namespace Cave
             return Parse(name, data, properties);
         }
 
-        /// <summary>Obtains the configuration file writer using the specified <see cref="FileLocation" />.</summary>
-        /// <param name="fileLocation">The file location.</param>
-        /// <param name="properties">The content properties.</param>
-        /// <returns>Returns a new <see cref="IniWriter"/> instance.</returns>
-        public static IniWriter FromLocation(FileLocation fileLocation, IniProperties properties = default)
-        {
-            if (fileLocation == null)
-            {
-                fileLocation = new FileLocation(root: RootLocation.RoamingUserConfig, extension: Ini.PlatformExtension);
-            }
-
-            string fileName = fileLocation.ToString();
-            return FromFile(fileName, properties);
-        }
-
-        /// <summary>Obtains the configuration file writer using the specified <see cref="RootLocation" />.</summary>
-        /// <param name="root">The root location.</param>
-        /// <param name="properties">The content properties.</param>
-        /// <returns>Returns a new <see cref="IniWriter"/> instance.</returns>
-        public static IniWriter FromLocation(RootLocation root, IniProperties properties = default)
-        {
-            var fileLocation = new FileLocation(root: root, extension: Ini.PlatformExtension);
-            return FromLocation(fileLocation, properties);
-        }
-
         #endregion
-
-        readonly Dictionary<string, List<string>> data = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// Gets or sets the IniProperties.
-        /// </summary>
-        public IniProperties Properties { get; set; }
-
-        /// <summary>
-        /// Gets or sets name of the ini writer.
-        /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>Initializes a new instance of the <see cref="IniWriter"/> class.</summary>
-        public IniWriter()
-        {
-            Properties = IniProperties.Default;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IniWriter"/> class.
-        /// </summary>
-        /// <param name="fileName">Name of the file to write to.</param>
-        /// <param name="properties">Encoding properties.</param>
-        public IniWriter(string fileName, IniProperties properties)
-        {
-            Properties = properties.Valid ? properties : IniProperties.Default;
-            Name = fileName;
-            if (File.Exists(fileName))
-            {
-                Load(IniReader.FromFile(fileName));
-            }
-            else
-            {
-                File.Open(fileName, FileMode.OpenOrCreate).Close();
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IniWriter"/> class.
-        /// </summary>
-        /// <param name="reader">Settings to initialize the writer from.</param>
-        public IniWriter(ISettings reader)
-        {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
-
-            Name = reader.Name;
-            if (reader is IniReader)
-            {
-                Properties = ((IniReader)reader).Properties;
-                if (!Properties.Valid)
-                {
-                    Properties = IniProperties.Default;
-                }
-            }
-            else
-            {
-                Properties = IniProperties.Default;
-            }
-            Load(reader);
-        }
 
         /// <summary>
         /// Loads all settings from the specified reader and replaces all present sections.
@@ -211,9 +180,14 @@ namespace Cave
         /// <param name="values">The values.</param>
         public void WriteSection(string section, IEnumerable values)
         {
+            if (section == null)
+            {
+                throw new ArgumentNullException("section");
+            }
+
             if (values == null)
             {
-                throw new ArgumentNullException(nameof(values));
+                throw new ArgumentNullException("values");
             }
 
             var strings = new List<string>();
@@ -233,12 +207,12 @@ namespace Cave
         {
             if (section == null)
             {
-                throw new ArgumentNullException(nameof(section));
+                throw new ArgumentNullException("section");
             }
 
             if (lines == null)
             {
-                throw new ArgumentNullException(nameof(lines));
+                throw new ArgumentNullException("lines");
             }
 
             var result = new List<string>();
@@ -316,7 +290,7 @@ namespace Cave
         /// <param name="value">Value of the setting.</param>
         public void WriteSetting(string section, string name, object value)
         {
-            WriteSetting(section, name, value is null ? null : StringExtensions.ToString(value, Properties.Culture));
+            WriteSetting(section, name, StringExtensions.ToString(value, Properties.Culture));
         }
 
         /// <summary>
@@ -434,13 +408,13 @@ namespace Cave
                 }
                 switch (Properties.Compression)
                 {
-                    case CompressionType.Deflate:
+                    case IniCompressionType.Deflate:
                         stream = new DeflateStream(stream, CompressionMode.Compress, true);
                         break;
-                    case CompressionType.GZip:
+                    case IniCompressionType.GZip:
                         stream = new GZipStream(stream, CompressionMode.Compress, true);
                         break;
-                    case CompressionType.None: break;
+                    case IniCompressionType.None: break;
                     default: throw new InvalidDataException(string.Format("Unknown Compression {0}", Properties.Compression));
                 }
 
@@ -476,10 +450,12 @@ namespace Cave
 
         /// <summary>Converts all settings to a new reader.</summary>
         /// <returns>Returns a new <see cref="ISettings"/> instance containing all settings.</returns>
-        public ISettings ToSettings()
-        {
-            return IniReader.Parse(Name, ToString(), Properties);
-        }
+        public IniReader ToReader() => IniReader.Parse(Name, ToString(), Properties);
+
+        /// <summary>Converts all settings to a new reader.</summary>
+        /// <returns>Returns a new <see cref="ISettings"/> instance containing all settings.</returns>
+        [Obsolete("Use ToReader()")]
+        public IniReader ToSettings() => ToReader();
 
         /// <summary>
         /// Retrieves the whole data as string.

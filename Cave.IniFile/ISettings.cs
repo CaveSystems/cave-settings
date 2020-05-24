@@ -14,6 +14,21 @@ namespace Cave
         string Name { get; }
 
         /// <summary>
+        /// Gets the properties.
+        /// </summary>
+        IniProperties Properties { get; }
+
+        /// <summary>
+        /// Gets the culture used to decode values.
+        /// </summary>
+        public CultureInfo Culture { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the config can be reload.
+        /// </summary>
+        bool CanReload { get; }
+
+        /// <summary>
         /// Obtains whether a specified section exists or not.
         /// </summary>
         /// <param name="section">Section to search.</param>
@@ -184,19 +199,9 @@ namespace Cave
         bool ReadObjectProperties(string section, object container, bool throwEx = true);
 
         /// <summary>
-        /// Gets a value indicating whether the config can be reload.
-        /// </summary>
-        bool CanReload { get; }
-
-        /// <summary>
         /// Reload the whole config.
         /// </summary>
         void Reload();
-
-        /// <summary>
-        /// Gets the culture used to decode values.
-        /// </summary>
-        CultureInfo Culture { get; }
 
         #region Read Value Members
 

@@ -26,15 +26,14 @@ namespace Test
                         continue;
                     }
 
-                    GC.Collect(999, GCCollectionMode.Default, true);
+                    GC.Collect();
 
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.WriteLine($"{method.DeclaringType.Name}.cs: info TI0001: Start {method.Name}");
                     Console.ResetColor();
                     try
                     {
-                        var action = (Action)method.CreateDelegate(typeof(Action), instance);
-                        action();
+                        method.Invoke(instance, null);
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine($"{method.DeclaringType.Name}.cs: info TI0002: Success {method.Name}");
                         Console.ResetColor();

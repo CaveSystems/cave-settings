@@ -2,7 +2,6 @@ using System;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using Cave.Compression;
 
 namespace Cave
 {
@@ -11,6 +10,70 @@ namespace Cave
     /// </summary>
     public struct IniProperties : IEquatable<IniProperties>
     {
+        /// <summary>
+        /// Default is case insensitive. Set this to true to match properties exactly.
+        /// </summary>
+        public bool CaseSensitive;
+
+        /// <summary>
+        /// Use simple synchroneous encryption to protect from users eyes ?
+        /// (This is not a security feature, use file system acl to protect from other users.)
+        /// </summary>
+        public SymmetricAlgorithm Encryption;
+
+        /// <summary>
+        /// Gets / sets the culture used to en/decode values.
+        /// </summary>
+        public CultureInfo Culture;
+
+        /// <summary>
+        /// Gets / sets the <see cref="IniCompressionType"/>.
+        /// </summary>
+        public IniCompressionType Compression;
+
+        /// <summary>
+        /// Gets / sets the <see cref="Encoding"/>.
+        /// </summary>
+        public Encoding Encoding;
+
+        /// <summary>
+        /// Gets / sets the format of date time fields.
+        /// </summary>
+        public string DateTimeFormat;
+
+        /// <summary>
+        /// Gets <see cref="IniProperties"/> with default settings:
+        /// Encoding=UTF8, Compression=None, InvariantCulture and no encryption.
+        /// </summary>
+        public static IniProperties Default
+        {
+            get
+            {
+                var result = new IniProperties
+                {
+                    Culture = CultureInfo.InvariantCulture,
+                    Compression = IniCompressionType.None,
+                    Encoding = new UTF8Encoding(false),
+                    DateTimeFormat = StringExtensions.InterOpDateTimeFormat,
+                };
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the properties are all set or not.
+        /// </summary>
+        public bool Valid
+        {
+            get
+            {
+                return
+                    Enum.IsDefined(typeof(IniCompressionType), Compression) &&
+                    (Encoding != null) &&
+                    (Culture != null);
+            }
+        }
+
         /// <summary>Implements the operator ==.</summary>
         /// <param name="properties1">The properties1.</param>
         /// <param name="properties2">The properties2.</param>
@@ -27,25 +90,6 @@ namespace Cave
         public static bool operator !=(IniProperties properties1, IniProperties properties2)
         {
             return !properties1.Equals(properties2);
-        }
-
-        /// <summary>
-        /// Gets <see cref="IniProperties"/> with default settings:
-        /// Encoding=UTF8, Compression=None, InvariantCulture and no encryption.
-        /// </summary>
-        public static IniProperties Default
-        {
-            get
-            {
-                var result = new IniProperties
-                {
-                    Culture = CultureInfo.InvariantCulture,
-                    Compression = CompressionType.None,
-                    Encoding = new UTF8Encoding(false),
-                    DateTimeFormat = StringExtensions.InterOpDateTimeFormat,
-                };
-                return result;
-            }
         }
 
         /// <summary>
@@ -69,51 +113,6 @@ namespace Cave
             result.Encryption.IV = pkkdf1.GetBytes(result.Encryption.BlockSize / 8);
             (pkkdf1 as IDisposable)?.Dispose();
             return result;
-        }
-
-        /// <summary>
-        /// Default is case insensitive. Set this to true to match properties exactly.
-        /// </summary>
-        public bool CaseSensitive;
-
-        /// <summary>
-        /// Use simple synchroneous encryption to protect from users eyes ?
-        /// (This is not a security feature, use file system acl to protect from other users.)
-        /// </summary>
-        public SymmetricAlgorithm Encryption;
-
-        /// <summary>
-        /// Gets / sets the culture used to en/decode values.
-        /// </summary>
-        public CultureInfo Culture;
-
-        /// <summary>
-        /// Gets / sets the <see cref="CompressionType"/>.
-        /// </summary>
-        public CompressionType Compression;
-
-        /// <summary>
-        /// Gets / sets the <see cref="Encoding"/>.
-        /// </summary>
-        public Encoding Encoding;
-
-        /// <summary>
-        /// Gets / sets the format of date time fields.
-        /// </summary>
-        public string DateTimeFormat;
-
-        /// <summary>
-        /// Gets a value indicating whether the properties are all set or not.
-        /// </summary>
-        public bool Valid
-        {
-            get
-            {
-                return
-                    Enum.IsDefined(typeof(CompressionType), Compression) &&
-                    (Encoding != null) &&
-                    (Culture != null);
-            }
         }
 
         /// <summary>Returns a hash code for this instance.</summary>

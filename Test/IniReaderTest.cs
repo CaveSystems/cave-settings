@@ -58,8 +58,8 @@ namespace Test
                     var original = fields1[n].GetValue(settings[i]);
                     var value1 = fields1[n].GetValue(settings1);
                     var value2 = fields2[n].GetValue(settings2);
-                    var value3 = fields3[n].GetValue(settings3);
-                    var value4 = fields4[n].GetValue(settings4);
+                    var value3 = fields3[n].GetValue(settings3, null);
+                    var value4 = fields4[n].GetValue(settings4, null);
                     if (original is DateTime dt && !Equals(original, value1))
                     {
                         switch (reader.Properties.Culture.ThreeLetterISOLanguageName)
